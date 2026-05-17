@@ -896,4 +896,3 @@ function saveAccount(){
     if(techAccounts.find((a,i)=>a.username===username&&(!isEdit||i!==parseInt(editId)))){document.getElementById('acct-error').textContent='Username taken.';return;}
     if(isEdit){const idx=parseInt(editId);techAccounts[idx].name=name;techAccounts[idx].username=username;techAccounts[idx].rating=acctCurrentRating;if(password)techAccounts[idx].passwordHash=hashPassword(password);}
     else{if(!password){document.getElementById('acct-error').textContent=
-...
