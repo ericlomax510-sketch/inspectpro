@@ -65,4 +65,41 @@ Professional vehicle inspection app for technicians and customers.
 | index.html | App structure and HTML |
 | style.css | All styles and layout |
 | app.js | All JavaScript and logic |
-| payment.html | Stripe subscript
+| payment.html | Stripe subscription and payment pages |
+
+---
+
+## Environment Setup
+
+To run InspectPro locally, you'll need:
+
+1. **Supabase Account** - Set up backend services
+2. **Stripe Account** - Configure payment processing
+3. **API Keys** - Add Supabase URL and Stripe keys to your environment
+
+### Running Locally
+
+1. Clone the repository
+2. Set up your environment variables (Supabase and Stripe credentials)
+3. Open `index.html` in your browser or use a local server
+4. Log in with the default admin credentials or create a new account
+
+---
+
+## Deployment
+
+This app is deployed on **Netlify** and integrates with **GitHub** for continuous deployment.
+
+- Push to `main` branch to trigger automatic deployment
+- Netlify builds and deploys the static site
+- All backend logic runs on Supabase edge functions
+
+---
+
+## Support
+
+For issues, questions, or feature requests, please open a GitHub issue in this repository.
+
+---
+
+**Built with 💙 by InspectPro Team**
