@@ -41,20 +41,65 @@ Professional vehicle inspection app for technicians and customers.
 ## Tech Stack
 
 - HTML / CSS / JavaScript (no frameworks)
-- Stripe — payments and subscriptions
-- Supabase — backend and edge functions
+- Stripe — payments and subscriptions (optional)
 - jsPDF — PDF report generation
-- GitHub + Netlify — hosting and deployment
+- GitHub + Netlify/Vercel — hosting and deployment
 
 ---
 
-## Stripe Products
+## Quick Start
 
-| Product | Amount | Type |
-|---------|--------|------|
-| Booking Fee | $3.00 | One-time (charged on job accept) |
-| App Help Fee | $5.00 | One-time (charged per report sent) |
-| Customer Premium | $9.99/mo or $95.99/yr | Recurring subscription |
+### 1. Clone & Setup
+```bash
+git clone https://github.com/ericlomax510-sketch/inspectpro.git
+cd inspectpro
+```
+
+### 2. Local Development
+Pick one option:
+
+**Option A: Python** (built-in)
+```bash
+python -m http.server 8000
+```
+
+**Option B: Node.js**
+```bash
+npx http-server
+```
+
+**Option C: VS Code Live Server**
+- Right-click `index.html` → "Open with Live Server"
+
+Then visit: **http://localhost:8000**
+
+---
+
+## Deployment
+
+### Option A: GitHub Pages (Free ⭐ Easiest)
+1. Go to Settings → Pages
+2. Select "Deploy from branch"
+3. Choose branch: `main`
+4. Save
+
+Your app will be live at: `https://ericlomax510-sketch.github.io/inspectpro`
+
+### Option B: Netlify (Recommended)
+1. Sign in to [netlify.com](https://netlify.com)
+2. Click "New site from Git"
+3. Connect your GitHub repo
+4. Deploy settings:
+   - Base directory: `/` (root)
+   - Build command: (leave blank)
+   - Publish directory: `/` (root)
+5. Click **Deploy**
+
+### Option C: Vercel
+1. Sign in to [vercel.com](https://vercel.com)
+2. Click "New Project"
+3. Import your GitHub repository
+4. Deploy
 
 ---
 
@@ -65,34 +110,64 @@ Professional vehicle inspection app for technicians and customers.
 | index.html | App structure and HTML |
 | style.css | All styles and layout |
 | app.js | All JavaScript and logic |
-| payment.html | Stripe subscription and payment pages |
+
+---
+
+## Features Included
+
+✅ **Technician App**
+- 5-step vehicle inspection workflow
+- Photo & video capture
+- PDF report generation
+- Customer management
+- Job inbox with status tracking
+- Service pricing management
+- Private work video vault
+
+✅ **Customer Portal**
+- Submit service requests
+- Upload photos & walk-around video
+- Receive inspection reports
+- Track job status
+- Rate mechanics
+
+✅ **Admin Panel**
+- Create technician accounts
+- Create customer profiles
+- Manage service prices
+- View all records
 
 ---
 
 ## Environment Setup
 
-To run InspectPro locally, you'll need:
+No backend required! All data is stored locally in **browser localStorage**.
 
-1. **Supabase Account** - Set up backend services
-2. **Stripe Account** - Configure payment processing
-3. **API Keys** - Add Supabase URL and Stripe keys to your environment
-
-### Running Locally
-
-1. Clone the repository
-2. Set up your environment variables (Supabase and Stripe credentials)
-3. Open `index.html` in your browser or use a local server
-4. Log in with the default admin credentials or create a new account
+To enable **optional** Stripe payments:
+- Get API keys from [stripe.com](https://stripe.com)
+- Update `STRIPE_PK` in `app.js` line 1140
 
 ---
 
-## Deployment
+## Browser Support
 
-This app is deployed on **Netlify** and integrates with **GitHub** for continuous deployment.
+- ✅ Chrome 90+
+- ✅ Firefox 88+
+- ✅ Safari 14+
+- ✅ Edge 90+
 
-- Push to `main` branch to trigger automatic deployment
-- Netlify builds and deploys the static site
-- All backend logic runs on Supabase edge functions
+---
+
+## Troubleshooting
+
+**Photos not saving**
+→ Check browser privacy settings; localStorage must be enabled
+
+**Video recording not working**
+→ HTTPS required for camera access (Netlify/Vercel provide this automatically)
+
+**Can't self-register**
+→ Use default credentials first: `admin / admin123`
 
 ---
 
