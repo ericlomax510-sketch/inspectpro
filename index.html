@@ -70,11 +70,10 @@
     <div class="logo">Inspect<span>Pro</span></div>
     <div style="display:flex;gap:4px;flex-wrap:wrap">
       <button class="top-tab active" id="ttab-home"       onclick="gotoScreen('home')">🏠 Home</button>
-      <button class="top-tab"        id="ttab-inbox"      onclick="gotoScreen('inbox')">📥 Inbox <span id="inbox-badge-count" style="display:none;background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:12px;font-weight:800">0</span></button>
+      <button class="top-tab"        id="ttab-inbox"      onclick="gotoScreen('inbox')">📥 Inbox <span id="inbox-badge-count" style="display:none;background:var(--red);color:#fff;font-size:10px;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-weight:700">0</span></button>
       <button class="top-tab"        id="ttab-inspection" onclick="gotoScreen('inspection')">🔍 Inspect</button>
       <button class="top-tab"        id="ttab-customers"  onclick="gotoScreen('customers')">📋 Records</button>
       <button class="top-tab"        id="ttab-pricing"    onclick="gotoScreen('pricing')">💰 Pricing</button>
-      <button class="top-tab"        id="ttab-accounts"   onclick="gotoScreen('accounts')">🔑 Accounts</button>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.4)" id="topbar-user"></div>
     <button class="logout-btn" onclick="logout()">Logout</button>
@@ -185,13 +184,13 @@
           </div>
           <div class="card" style="border-color:rgba(34,214,122,.25)">
             <div class="card-title" style="color:var(--green)">✅ Post-Job Checklist</div>
-            <div class="postjob-check"><div class="pj-checkbox" id="pj-1" onclick="togglePostJob(1)"></div><div><div class="pj-label">Work completed as described</div><div class="pj-sub">All services done right</div></div></div>
-            <div class="postjob-check"><div class="pj-checkbox" id="pj-2" onclick="togglePostJob(2)"></div><div><div class="pj-label">Customer informed of all findings</div><div class="pj-sub">Explained clearly</div></div></div>
+            <div class="postjob-check"><div class="pj-checkbox" id="pj-1" onclick="togglePostJob(1)"></div><div><div class="pj-label">Work completed as described</div><div class="pj-sub">All services done</div></div></div>
+            <div class="postjob-check"><div class="pj-checkbox" id="pj-2" onclick="togglePostJob(2)"></div><div><div class="pj-label">Customer informed of all findings</div><div class="pj-sub">Explained issues clearly</div></div></div>
             <div class="postjob-check"><div class="pj-checkbox" id="pj-3" onclick="togglePostJob(3)"></div><div><div class="pj-label">Additional issues noted</div><div class="pj-sub">Any extra problems documented</div></div></div>
             <div class="postjob-check"><div class="pj-checkbox" id="pj-4" onclick="togglePostJob(4)"></div><div><div class="pj-label">Customer questions answered</div></div></div>
             <div style="margin-top:14px">
               <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">What was fixed</label>
-              <textarea id="f-work-done" rows="3" placeholder="e.g. Replaced front brake pads..." style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13px;color:#111;font-family:Arial,sans-serif;outline:none;resize:vertical"></textarea>
+              <textarea id="f-work-done" rows="3" placeholder="e.g. Replaced front brake pads..." style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:'Mulish',sans-serif;color:#fff;resize:vertical"></textarea>
             </div>
           </div>
           <div class="step-actions"><button class="btn btn-ghost" onclick="goStep(3)">← Back</button><div class="spacer"></div><button class="btn btn-dark" onclick="goStep(5)">Next →</button></div>
@@ -232,32 +231,13 @@
         <div id="inbox-list"></div>
       </div>
 
-      <!-- ACCOUNTS -->
-      <div class="screen" id="screen-accounts">
-        <div class="section-heading"><h2>Accounts</h2><div class="badge">Admin</div></div>
-        <div class="card" style="margin-bottom:16px">
-          <div style="display:flex;align-items:center;margin-bottom:16px">
-            <div class="card-title" style="margin-bottom:0;flex:1">🔧 Technicians</div>
-            <button class="btn btn-dark" style="font-size:12px;padding:7px 14px" onclick="openAccountModal('tech')">+ New Tech</button>
-          </div>
-          <div id="tech-accounts-list"></div>
-        </div>
-        <div class="card">
-          <div style="display:flex;align-items:center;margin-bottom:16px">
-            <div class="card-title" style="margin-bottom:0;flex:1">🚗 Customers</div>
-            <button class="btn btn-dark" style="font-size:12px;padding:7px 14px" onclick="openAccountModal('customer')">+ New Customer</button>
-          </div>
-          <div id="customer-accounts-list"></div>
-        </div>
-      </div>
-
       <!-- PRICING -->
       <div class="screen" id="screen-pricing">
         <div class="section-heading"><h2>Service Pricing</h2><div style="flex:1"></div><button class="btn btn-accent" onclick="saveServicePrices()">💾 Save Prices</button></div>
         <div class="card">
           <div class="card-title">Set Your Prices</div>
           <div id="app-price-editor"></div>
-          <div id="price-saved-msg" style="display:none;color:var(--green);font-size:13px;font-weight:700;margin-top:14px;text-align:center;padding:10px;background:rgba(34,214,122,.08);border-radius:8px">✓ Prices saved</div>
+          <div id="price-saved-msg" style="display:none;color:var(--green);font-size:13px;font-weight:700;margin-top:14px;text-align:center;padding:10px;background:rgba(34,214,122,.08);border-radius:8px">💾 Prices saved!</div>
         </div>
       </div>
 
@@ -332,7 +312,7 @@
       <div class="pc-title" style="color:var(--accent)">📨 Send To</div>
       <div id="send-to-selected" style="display:none;background:rgba(232,255,71,.08);border:1.5px solid rgba(232,255,71,.3);border-radius:12px;padding:14px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div id="sts-avatar" style="width:40px;height:40px;border-radius:10px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#e8ff47"></div>
+          <div id="sts-avatar" style="width:40px;height:40px;border-radius:10px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#e8ff47"></div>
           <div style="flex:1"><div id="sts-name" style="font-weight:800;font-size:14px;color:#fff"></div><div id="sts-sub" style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px"></div></div>
           <button onclick="clearSelectedTech()" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:7px;color:rgba(255,255,255,.4);font-size:12px;padding:5px 10px;cursor:pointer">Change</button>
         </div>
@@ -354,39 +334,6 @@
     <div style="flex:1"></div>
     <button class="portal-btn portal-btn-ghost" onclick="logout()">Cancel</button>
     <button class="portal-btn" id="portal-submit-btn" onclick="submitPortal()" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.3);cursor:not-allowed" disabled>✓ Submit</button>
-  </div>
-</div>
-
-<!-- ACCOUNT MODAL -->
-<div class="modal-bg" id="account-modal">
-  <div class="modal-box">
-    <h3 id="acct-modal-title">Create Account</h3>
-    <p id="acct-modal-sub">Fill in the details below.</p>
-    <input type="hidden" id="acct-edit-id">
-    <input type="hidden" id="acct-type">
-    <label>Full Name</label><input type="text" id="acct-name" placeholder="Full name">
-    <label>Username</label><input type="text" id="acct-username" placeholder="Username" autocomplete="off">
-    <label>Password</label><input type="password" id="acct-password" placeholder="Password" autocomplete="new-password">
-    <div id="acct-cust-fields" style="display:none">
-      <label>Phone</label><input type="tel" id="acct-phone" placeholder="(555) 000-0000">
-      <label>Vehicle</label><input type="text" id="acct-vehicle" placeholder="2022 Toyota Camry">
-    </div>
-    <div id="acct-tech-fields" style="display:none">
-      <label>Star Rating (1–5)</label>
-      <div style="display:flex;gap:6px;margin-bottom:10px" id="acct-star-picker">
-        <span class="star" onclick="setAcctRating(1)" id="acct-star-1">☆</span>
-        <span class="star" onclick="setAcctRating(2)" id="acct-star-2">☆</span>
-        <span class="star" onclick="setAcctRating(3)" id="acct-star-3">☆</span>
-        <span class="star" onclick="setAcctRating(4)" id="acct-star-4">☆</span>
-        <span class="star" onclick="setAcctRating(5)" id="acct-star-5">☆</span>
-      </div>
-    </div>
-    <div class="login-error" id="acct-error"></div>
-    <div class="modal-actions" style="margin-top:12px">
-      <button class="btn btn-ghost" onclick="closeAccountModal()">Cancel</button>
-      <div class="spacer"></div>
-      <button class="btn btn-accent" onclick="saveAccount()">💾 Save</button>
-    </div>
   </div>
 </div>
 
