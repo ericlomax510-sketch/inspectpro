@@ -6,15 +6,21 @@ Summary of what's included in this branch:
 - capacitor.config.json (appId: com.ericlomax510.inspectpro)
 - package.json with Capacitor deps + helper scripts
 - scripts/build-www.js — copies web files into `www/`
-- templates/Info.plist.template — iOS permission entries to add in Xcode if needed
-- templates/AndroidManifest.template — Android permission entries to add in AndroidManifest.xml
+- templates/Info.plist.template — iOS permission entries to add in Xcode if your app uses camera/microphone/photo library
+- templates/AndroidManifest.template — Android permission entries to add in AndroidManifest.xml if your app needs camera/audio/storage
 - GitHub Actions workflows (Android & iOS) templates to build signed artifacts in CI (require secrets)
+
+Important additions made in this branch:
+- No default admin account is seeded by the app (for security).
+- Payment keys and booking endpoint are now read from runtime configuration (window.INSPECTPRO_CONFIG) instead of hardcoded values.
+- Added .env.example and docs/CONFIG.md describing how to provide runtime config and secrets in CI.
+- Added a privacy-policy.md template to the repo — you must host and reference a privacy policy URL when submitting to stores.
 
 Quick local workflow (full):
 
 1) Clone and checkout the branch
    git fetch origin
-   git checkout capacitor-setup
+   git checkout pr-2-additions
 
 2) Install Node deps
    npm install
@@ -52,11 +58,14 @@ iOS (macOS only):
 - Product -> Archive -> Upload to App Store Connect
 
 Store requirements & notes:
-- Privacy policy URL required on both stores
+- Privacy policy URL required on both stores — a template is included in privacy-policy.md; host it on your website and add the URL in store consoles
 - App icon and screenshots for required device sizes
 - Short & long descriptions, support URL/email
-- Data/Privacy declarations in consoles
+- Data/Privacy declarations in consoles — ensure these match your privacy policy and actual data usage
 - Apple: follow in-app purchase rules (digital goods must use StoreKit)
+
+Configuration & secrets
+- This repo no longer embeds payment keys or endpoints in source. Provide runtime configuration via a small script in index.html that sets window.INSPECTPRO_CONFIG, or inject during your CI build. See docs/CONFIG.md and .env.example for guidance.
 
 CI tips:
 - The workflows in .github/workflows are templates; they need repository secrets for signing artifacts (keystore, passwords, Apple credentials).
