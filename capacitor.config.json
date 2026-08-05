@@ -1,0 +1,6 @@
+{
+  "appId": "com.ericlomax510.inspectpro",
+  "appName": "inspectpro",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
