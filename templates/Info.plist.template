@@ -1,0 +1,14 @@
+<!-- templates/Info.plist.template -->
+<!-- Add these keys (with user-facing explanations) to your iOS project's Info.plist if your app uses camera, mic, or photo library -->
+
+<key>NSCameraUsageDescription</key>
+<string>This app needs camera access to capture vehicle photos for inspection reports.</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>This app needs microphone access to record walk-around videos for inspections.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs access to your photo library to attach or save inspection photos.</string>
+
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app saves inspection photos to your photo library.</string>
