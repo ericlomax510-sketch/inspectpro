@@ -771,6 +771,7 @@ function renderInbox(){
           <div style="font-size:12px;color:var(--muted);margin-top:2px">${profile.vehicle||'—'} · ${new Date(sub.date).toLocaleString()}</div>
         </div>
       </div>
+      ${renderBookingFeeStatus(sub)}
       ${svcCount?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${sub.requestedServices.map(s=>`<span style="background:rgba(59,130,246,.1);color:var(--blue);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px">${s}</span>`).join('')}</div>`:''}
       ${sub.comments?`<div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;border:1px solid var(--border)">"${sub.comments}"</div>`:''}
       ${status==='pending'?`<div style="display:flex;gap:8px"><button class="btn btn-green" style="flex:1" onclick="respondToJob('${profile.id}',${subIdx},'accepted')">✓ Accept Job</button><button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)" onclick="respondToJob('${profile.id}',${subIdx},'declined')">✕ Decline</button></div>`:''}
@@ -778,18 +779,66 @@ function renderInbox(){
         <div style="flex:1;background:rgba(34,214,122,.08);border:1px solid rgba(34,214,122,.2);border-radius:8px;padding:10px;font-size:13px;color:var(--green);font-weight:600;text-align:center">✓ Accepted</div>
         <button class="btn btn-dark" onclick="startInspectionFromJob('${profile.id}',${subIdx})">📋 Start Inspection</button>
       </div>`:''}
+      ${status==='accepted' && currentTechAccount?.role==='admin' && sub.bookingFeeStatus==='charged' && sub.bookingFeeRefundStatus!=='succeeded' ? `
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;border-color:rgba(255,184,0,.4);color:#ffb800" onclick="openManualRefundModal('${profile.id}',${subIdx})">↩ Manual Refund</button>
+      </div>` : ''}
       ${status==='declined'?`<div style="background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.15);border-radius:8px;padding:10px;font-size:13px;color:var(--red);font-weight:600;text-align:center">✕ Declined</div>`:''}
     </div>`;
   }).join('');
 }
 
-function respondToJob(profileId,subIdx,response){
+function renderBookingFeeStatus(submission) {
+  const sub = normalizeSubmissionPaymentState(submission);
+  const feeLabel = BOOKING_FEE_LABEL || '$3.00 booking fee';
+
+  if (sub.bookingFeeStatus === 'charged') {
+    return `<div style="font-size:12px;margin-bottom:10px;background:rgba(34,214,122,.08);border:1px solid rgba(34,214,122,.2);padding:8px 10px;border-radius:8px;color:var(--green)">💳 ${feeLabel} charged${sub.bookingFeeRefundStatus === 'pending' ? ' · refund pending' : ''}${sub.bookingFeeRefundStatus === 'failed' ? ' · refund failed' : ''}</div>`;
+  }
+  if (sub.bookingFeeStatus === 'refunded') {
+    return `<div style="font-size:12px;margin-bottom:10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);padding:8px 10px;border-radius:8px;color:var(--blue)">↩ ${feeLabel} refunded</div>`;
+  }
+  if (sub.bookingFeeStatus === 'failed') {
+    return `<div style="font-size:12px;margin-bottom:10px;background:rgba(255,59,59,.08);border:1px solid rgba(255,59,59,.25);padding:8px 10px;border-radius:8px;color:var(--red)">⚠ ${feeLabel} charge failed</div>`;
+  }
+  if (sub.bookingFeeStatus === 'processing') {
+    return `<div style="font-size:12px;margin-bottom:10px;background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.25);padding:8px 10px;border-radius:8px;color:#ffb800">⏳ Charging ${feeLabel}...</div>`;
+  }
+  return `<div style="font-size:12px;margin-bottom:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);padding:8px 10px;border-radius:8px;color:rgba(255,255,255,.65)">💳 ${feeLabel} pending acceptance</div>`;
+}
+
+async function respondToJob(profileId,subIdx,response){
   const id=parseInt(profileId);
   const pIdx=custProfiles.findIndex(p=>p.id===id);
   if(pIdx<0){toast('Profile not found.');return;}
-  custProfiles[pIdx].submissions[subIdx].jobStatus=response;
-  saveCustProfiles(); renderInbox();
-  toast(response==='accepted'?'✓ Job accepted! Start the inspection from the inbox.':'✕ Job declined.');
+  const submission = custProfiles[pIdx]?.submissions?.[subIdx];
+  if (!submission) { toast('Submission not found.'); return; }
+
+  normalizeSubmissionPaymentState(submission);
+
+  if (response === 'accepted') {
+    const charged = await chargeBookingFee(id, subIdx);
+    if (!charged) {
+      toast('⚠ Unable to charge booking fee. Job left pending.');
+      renderInbox();
+      return;
+    }
+    submission.jobStatus = 'accepted';
+    saveCustProfiles(); renderInbox();
+    toast('✓ Job accepted! Start the inspection from the inbox.');
+    return;
+  }
+
+  submission.jobStatus = 'declined';
+  saveCustProfiles();
+
+  if (submission.bookingFeeStatus === 'charged' && submission.bookingFeeRefundStatus !== 'succeeded') {
+    const refunded = await requestBookingFeeRefund(id, subIdx, 'tech_declined', 'Technician declined the job');
+    if (!refunded) toast('⚠ Declined, but refund needs manual follow-up.');
+  }
+
+  renderInbox();
+  toast('✕ Job declined.');
 }
 
 function startInspectionFromJob(profileId, subIdx) {
@@ -1161,6 +1210,8 @@ function renderPortalJobStatus(profile){
 // ══════════════════════════════════════════
 const STRIPE_PK         = 'pk_test_51TXEsaCzOxLaHXl2GJalOveBQvd7cDrook2SnCyDMDVDOBzCYtEeJbM9j8B7nDxACAKc3joHm4Q0OPmKGBACkh1Y00UPoPbjQX';
 const BOOKING_ENDPOINT  = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/charge-booking-fee';
+const REFUND_ENDPOINT   = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/refund-booking-fee';
+const PAYMENT_AUDIT_ENDPOINT = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/payment-audit';
 const BOOKING_PRICE_ID  = 'price_1TXKqFCzOxLaHXl256ffsOi9';
 const BOOKING_FEE_LABEL = '$3.00 booking fee';
 
@@ -1324,7 +1375,17 @@ function submitPortal() {
         appointmentTime: selectedTime,
         appointmentTimeLabel: selectedTimeLabel,
         paymentMethodId: paymentMethodId || custProfiles[pIdx].stripePaymentMethodId,
-        bookingFeePending: true
+        paymentEventId: null,
+        bookingFeePending: true,
+        bookingFeeStatus: 'pending',
+        bookingFeeChargedAt: null,
+        bookingFeeChargeId: null,
+        bookingFeePaymentIntentId: null,
+        bookingFeeRefundStatus: 'not_requested',
+        bookingFeeRefundId: null,
+        bookingFeeRefundedAt: null,
+        bookingFeeRefundReason: null,
+        bookingFeeError: null
       });
       custProfiles[pIdx].preferredMechanic = techUsername;
       custProfiles[pIdx].preferredMechanicName = techName;
@@ -1341,7 +1402,7 @@ function submitPortal() {
           <div style="font-size:14px;color:rgba(255,255,255,.5);max-width:320px;line-height:1.8;margin-bottom:8px">
             Sent to <strong style="color:#e8ff47">${techName}</strong>.<br>
             Appointment: <strong style="color:#e8ff47">${selectedDateLabel}</strong> at <strong style="color:#e8ff47">${selectedTimeLabel}</strong><br>
-            The ${BOOKING_FEE_LABEL} will only be charged if they accept.
+            The ${BOOKING_FEE_LABEL} will only be charged if they accept, and is automatically refunded if they decline.
           </div>
           <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:rgba(255,255,255,.4)">
             💳 Card ending in <strong style="color:#fff">${profile?.cardLast4||'••••'}</strong> will be charged ${BOOKING_FEE_LABEL} on acceptance
@@ -1374,35 +1435,211 @@ async function chargeBookingFee(profileId, subIdx) {
   if (!profile) return true; // skip if no profile
 
   const sub = profile.submissions[subIdx];
+  if (!sub) return true;
+  normalizeSubmissionPaymentState(sub);
+
+  if (sub.bookingFeeStatus === 'charged' || sub.bookingFeeStatus === 'refunded') return true;
+
   const paymentMethodId = sub?.paymentMethodId || profile?.stripePaymentMethodId;
 
   if (!paymentMethodId) {
     // No card on file — skip charge (handle manually)
+    sub.bookingFeeStatus = 'failed';
+    sub.bookingFeePending = true;
+    sub.bookingFeeError = 'No card on file';
+    saveCustProfiles();
     toast('⚠ No card on file for this customer.');
-    return true;
+    return false;
   }
 
   try {
+    sub.bookingFeeStatus = 'processing';
+    saveCustProfiles();
+    const paymentEventId = ensurePaymentEventId(sub, profile.id, subIdx);
     const res = await fetch(BOOKING_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        paymentEventId,
         paymentMethodId,
         priceId: BOOKING_PRICE_ID,
         customerName: profile.name,
-        customerEmail: profile.username
+        customerEmail: profile.username,
+        idempotencyKey: paymentEventId
       })
     });
     const data = await res.json();
     if (!res.ok || data.error) {
+      sub.bookingFeeStatus = 'failed';
+      sub.bookingFeeError = data.error || 'Payment failed';
+      sub.bookingFeePending = true;
+      saveCustProfiles();
       toast('⚠ Card declined: ' + (data.error || 'Payment failed'));
       return false;
     }
+
+    sub.bookingFeeStatus = 'charged';
+    sub.bookingFeePending = false;
+    sub.bookingFeeChargedAt = data.chargedAt || new Date().toISOString();
+    sub.bookingFeeChargeId = data.chargeId || data.paymentIntentId || paymentEventId;
+    sub.bookingFeePaymentIntentId = data.paymentIntentId || null;
+    sub.bookingFeeError = null;
+    saveCustProfiles();
+    syncPaymentAudit({
+      eventType: 'charge_succeeded',
+      paymentEventId,
+      profileId: profile.id,
+      submissionIndex: subIdx,
+      amountCents: 300,
+      currency: 'usd',
+      stripeChargeId: sub.bookingFeeChargeId,
+      stripePaymentIntentId: sub.bookingFeePaymentIntentId
+    });
     return true;
   } catch(e) {
-    // In dev/test mode without backend just allow it
-    console.warn('Booking fee charge skipped (no backend):', e);
+    sub.bookingFeeStatus = 'failed';
+    sub.bookingFeePending = true;
+    sub.bookingFeeError = 'Charge request failed';
+    saveCustProfiles();
+    console.warn('Booking fee charge failed:', e);
+    return false;
+  }
+}
+
+function ensurePaymentEventId(submission, profileId, subIdx) {
+  if (submission.paymentEventId) return submission.paymentEventId;
+  submission.paymentEventId = `evt_${profileId}_${subIdx}_${Date.now()}`;
+  return submission.paymentEventId;
+}
+
+function normalizeSubmissionPaymentState(submission) {
+  if (!submission || typeof submission !== 'object') return submission;
+  if (submission.bookingFeeStatus == null) {
+    submission.bookingFeeStatus = submission.bookingFeePending ? 'pending' : 'pending';
+  }
+  if (submission.bookingFeePending == null) {
+    submission.bookingFeePending = submission.bookingFeeStatus !== 'charged' && submission.bookingFeeStatus !== 'refunded';
+  }
+  if (!submission.bookingFeeRefundStatus) submission.bookingFeeRefundStatus = 'not_requested';
+  if (!submission.bookingFeeChargeId && submission.chargeId) submission.bookingFeeChargeId = submission.chargeId;
+  return submission;
+}
+
+async function requestBookingFeeRefund(profileId, subIdx, refundType, reason) {
+  const profile = custProfiles.find(p => p.id === parseInt(profileId));
+  if (!profile) return false;
+  const sub = profile.submissions?.[subIdx];
+  if (!sub) return false;
+
+  normalizeSubmissionPaymentState(sub);
+  if (sub.bookingFeeRefundStatus === 'succeeded') return true;
+
+  const chargeId = sub.bookingFeeChargeId || sub.bookingFeePaymentIntentId;
+  if (!chargeId) return false;
+
+  sub.bookingFeeRefundStatus = 'pending';
+  sub.bookingFeeRefundReason = reason || 'not-specified';
+  saveCustProfiles();
+
+  try {
+    const paymentEventId = ensurePaymentEventId(sub, profile.id, subIdx);
+    const res = await fetch(REFUND_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paymentEventId,
+        chargeId,
+        amountCents: 300,
+        currency: 'usd',
+        reason: reason || 'not-specified',
+        refundType: refundType || 'manual',
+        initiatedBy: currentTechAccount?.username || 'system',
+        idempotencyKey: `${paymentEventId}_refund_${refundType || 'manual'}`
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Refund failed');
+
+    sub.bookingFeeRefundStatus = data.status === 'succeeded' ? 'succeeded' : 'pending';
+    sub.bookingFeeRefundedAt = data.refundedAt || new Date().toISOString();
+    sub.bookingFeeRefundId = data.refundId || null;
+    if (sub.bookingFeeRefundStatus === 'succeeded') {
+      sub.bookingFeeStatus = 'refunded';
+      sub.bookingFeePending = false;
+    }
+    saveCustProfiles();
+
+    syncPaymentAudit({
+      eventType: 'refund_requested',
+      paymentEventId,
+      profileId: profile.id,
+      submissionIndex: subIdx,
+      amountCents: 300,
+      currency: 'usd',
+      stripeChargeId: chargeId,
+      stripeRefundId: sub.bookingFeeRefundId,
+      refundType: refundType || 'manual',
+      reason: reason || 'not-specified'
+    });
     return true;
+  } catch (e) {
+    sub.bookingFeeRefundStatus = 'failed';
+    sub.bookingFeeRefundError = e.message || 'Refund failed';
+    saveCustProfiles();
+    console.warn('Booking fee refund failed:', e);
+    return false;
+  }
+}
+
+function openManualRefundModal(profileId, subIdx) {
+  if (document.getElementById('manual-refund-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'manual-refund-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:9100;padding:16px';
+  modal.innerHTML = `
+    <div style="background:#252540;border:1px solid rgba(255,184,0,.25);border-radius:16px;padding:20px;max-width:440px;width:100%">
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px">Manual Booking Fee Refund</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:10px">Enter a reason for this refund. This will be logged with the payment record.</div>
+      <textarea id="manual-refund-reason" rows="4" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:#fff;font-family:'Mulish',sans-serif;font-size:13px;resize:vertical" placeholder="Example: duplicate charge, goodwill adjustment, customer escalation"></textarea>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeManualRefundModal()">Cancel</button>
+        <button class="btn btn-dark" style="flex:1;justify-content:center" onclick="submitManualRefund('${profileId}',${subIdx})">Process Refund</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function closeManualRefundModal() {
+  const modal = document.getElementById('manual-refund-modal');
+  if (modal) modal.remove();
+}
+
+async function submitManualRefund(profileId, subIdx) {
+  const reason = document.getElementById('manual-refund-reason')?.value?.trim();
+  if (!reason || reason.length < 5) {
+    toast('Add a short refund reason.');
+    return;
+  }
+  const ok = await requestBookingFeeRefund(profileId, subIdx, 'manual_admin', reason);
+  if (ok) {
+    closeManualRefundModal();
+    toast('✓ Refund submitted.');
+    renderInbox();
+  } else {
+    toast('⚠ Refund failed. Please retry.');
+  }
+}
+
+async function syncPaymentAudit(payload) {
+  try {
+    await fetch(PAYMENT_AUDIT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.warn('Payment audit sync skipped:', e);
   }
 }
 

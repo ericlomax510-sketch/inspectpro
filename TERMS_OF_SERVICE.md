@@ -49,12 +49,13 @@ InspectPro is a professional vehicle inspection platform that:
 ### Fee Structure:
 - **Booking Fee:** $3.00 USD
 - **When Charged:** When technician accepts your job
-- **Non-Refundable:** Unless technician declines the job
+- **Refund Policy:** Automatically refunded if technician declines after charge; other refund requests require manual review
 
 ### Payment Processing:
 - Payments handled by Stripe
 - By providing payment info, you authorize Stripe to charge your card
 - You agree to maintain valid payment information
+- Refund processing events are logged for audit and reconciliation
 
 ### Taxes:
 - You are responsible for any applicable taxes

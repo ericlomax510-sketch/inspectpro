@@ -146,6 +146,16 @@ No backend required! All data is stored locally in **browser localStorage**.
 To enable **optional** Stripe payments:
 - Get API keys from [stripe.com](https://stripe.com)
 - Update `STRIPE_PK` in `app.js` line 1140
+- Deploy Supabase Edge Functions in `supabase/functions/` for:
+  - `charge-booking-fee` (charge on acceptance)
+  - `refund-booking-fee` (automatic/manual refunds)
+  - `payment-audit` (payment/refund event logging)
+  - `stripe-webhook` (Stripe reconciliation updates)
+
+### Refund Behavior
+- Booking fee is charged when a technician accepts a job.
+- If a technician declines after charge, the app triggers an automatic refund.
+- Admin users can issue manual booking-fee refunds with a required reason.
 
 ---
 
