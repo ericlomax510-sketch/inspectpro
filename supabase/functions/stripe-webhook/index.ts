@@ -22,12 +22,23 @@ Deno.serve(async (req) => {
       const charge = event.data.object as Stripe.Charge;
       const paymentEventId = charge.metadata?.paymentEventId;
       if (paymentEventId) {
+        const { data: currentRow } = await supabase
+          .from('payment_events')
+          .select('metadata')
+          .eq('payment_event_id', paymentEventId)
+          .maybeSingle();
+
+        const mergedMetadata = {
+          ...(currentRow?.metadata || {}),
+          webhookEvent: event.id
+        };
+
         await supabase
           .from('payment_events')
           .update({
             event_type: 'refund_succeeded',
             stripe_refund_id: charge.refunds?.data?.[0]?.id || null,
-            metadata: { webhookEvent: event.id }
+            metadata: mergedMetadata
           })
           .eq('payment_event_id', paymentEventId);
       }
@@ -37,12 +48,24 @@ Deno.serve(async (req) => {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       const paymentEventId = paymentIntent.metadata?.paymentEventId;
       if (paymentEventId) {
+        const { data: currentRow } = await supabase
+          .from('payment_events')
+          .select('metadata')
+          .eq('payment_event_id', paymentEventId)
+          .maybeSingle();
+
+        const mergedMetadata = {
+          ...(currentRow?.metadata || {}),
+          webhookEvent: event.id,
+          lastPaymentError: paymentIntent.last_payment_error?.message || null
+        };
+
         await supabase
           .from('payment_events')
           .update({
             event_type: 'charge_failed',
             stripe_payment_intent_id: paymentIntent.id,
-            metadata: { webhookEvent: event.id, lastPaymentError: paymentIntent.last_payment_error?.message || null }
+            metadata: mergedMetadata
           })
           .eq('payment_event_id', paymentEventId);
       }

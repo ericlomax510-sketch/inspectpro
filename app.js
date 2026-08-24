@@ -1515,7 +1515,7 @@ function ensurePaymentEventId(submission, profileId, subIdx) {
 function normalizeSubmissionPaymentState(submission) {
   if (!submission || typeof submission !== 'object') return submission;
   if (submission.bookingFeeStatus == null) {
-    submission.bookingFeeStatus = submission.bookingFeePending ? 'pending' : 'pending';
+    submission.bookingFeeStatus = submission.bookingFeePending ? 'pending' : 'charged';
   }
   if (submission.bookingFeePending == null) {
     submission.bookingFeePending = submission.bookingFeeStatus !== 'charged' && submission.bookingFeeStatus !== 'refunded';
