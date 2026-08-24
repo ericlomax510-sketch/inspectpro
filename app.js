@@ -1481,7 +1481,7 @@ async function chargeBookingFee(profileId, subIdx) {
     sub.bookingFeeStatus = 'charged';
     sub.bookingFeePending = false;
     sub.bookingFeeChargedAt = data.chargedAt || new Date().toISOString();
-    sub.bookingFeeChargeId = data.chargeId || data.paymentIntentId || paymentEventId;
+    sub.bookingFeeChargeId = data.chargeId || data.paymentIntentId || null;
     sub.bookingFeePaymentIntentId = data.paymentIntentId || null;
     sub.bookingFeeError = null;
     saveCustProfiles();
@@ -1515,7 +1515,7 @@ function ensurePaymentEventId(submission, profileId, subIdx) {
 function normalizeSubmissionPaymentState(submission) {
   if (!submission || typeof submission !== 'object') return submission;
   if (submission.bookingFeeStatus == null) {
-    submission.bookingFeeStatus = submission.bookingFeePending ? 'pending' : 'charged';
+    submission.bookingFeeStatus = submission.bookingFeePending === false ? 'charged' : 'pending';
   }
   if (submission.bookingFeePending == null) {
     submission.bookingFeePending = submission.bookingFeeStatus !== 'charged' && submission.bookingFeeStatus !== 'refunded';

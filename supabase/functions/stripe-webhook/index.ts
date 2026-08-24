@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
           .from('payment_events')
           .update({
             event_type: 'refund_succeeded',
-            stripe_refund_id: charge.refunds?.data?.[0]?.id || null,
+            stripe_refund_id: charge.refunds?.data?.[charge.refunds.data.length - 1]?.id || null,
             metadata: mergedMetadata
           })
           .eq('payment_event_id', paymentEventId);
