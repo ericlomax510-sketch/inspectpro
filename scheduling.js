@@ -36,17 +36,17 @@ function getThirtyMinuteTimes() {
       const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
       times.push({ value, label: formatTime12Hour(value) });
     }
-
-    function isSlotBooked(techUsername, dateStr, timeValue) {
-      return customerAppointments.some(a =>
-        a.techUsername === techUsername &&
-        a.date === dateStr &&
-        (a.timeSlot || a.time) === timeValue &&
-        a.status !== 'cancelled'
-      );
-    }
   }
   return times;
+}
+
+function isSlotBooked(techUsername, dateStr, timeValue) {
+  return customerAppointments.some(a =>
+    a.techUsername === techUsername &&
+    a.date === dateStr &&
+    (a.timeSlot || a.time) === timeValue &&
+    a.status !== 'cancelled'
+  );
 }
 
 function initTechAvailability(techUsername) {
