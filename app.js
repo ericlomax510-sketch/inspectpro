@@ -1206,13 +1206,16 @@ function renderPortalJobStatus(profile){
 
 // ══════════════════════════════════════════
 // BOOKING FEE + CARD COLLECTION
-// Replace with your real values from Stripe + Supabase
+// Runtime config priority:
+// 1) window.__INSPECTPRO_ENV (from env.js generated at build time)
+// 2) hardcoded fallbacks below
 // ══════════════════════════════════════════
-const STRIPE_PK         = 'pk_test_51TXEsaCzOxLaHXl2GJalOveBQvd7cDrook2SnCyDMDVDOBzCYtEeJbM9j8B7nDxACAKc3joHm4Q0OPmKGBACkh1Y00UPoPbjQX';
-const BOOKING_ENDPOINT  = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/charge-booking-fee';
-const REFUND_ENDPOINT   = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/refund-booking-fee';
-const PAYMENT_AUDIT_ENDPOINT = 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/payment-audit';
-const BOOKING_PRICE_ID  = 'price_1TXKqFCzOxLaHXl256ffsOi9';
+const RUNTIME_ENV = (window && window.__INSPECTPRO_ENV) || {};
+const STRIPE_PK = RUNTIME_ENV.STRIPE_PUBLIC_KEY || 'pk_test_51TXEsaCzOxLaHXl2GJalOveBQvd7cDrook2SnCyDMDVDOBzCYtEeJbM9j8B7nDxACAKc3joHm4Q0OPmKGBACkh1Y00UPoPbjQX';
+const BOOKING_ENDPOINT = RUNTIME_ENV.SUPABASE_BOOKING_FEE_ENDPOINT || 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/charge-booking-fee';
+const REFUND_ENDPOINT = RUNTIME_ENV.SUPABASE_REFUND_ENDPOINT || 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/refund-booking-fee';
+const PAYMENT_AUDIT_ENDPOINT = RUNTIME_ENV.SUPABASE_PAYMENT_AUDIT_ENDPOINT || 'https://amjbapmsuspjftpxgpkz.supabase.co/functions/v1/payment-audit';
+const BOOKING_PRICE_ID = RUNTIME_ENV.STRIPE_BOOKING_PRICE_ID || 'price_1TXKqFCzOxLaHXl256ffsOi9';
 const BOOKING_FEE_LABEL = '$3.00 booking fee';
 
 let stripeInstance = null;
