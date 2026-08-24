@@ -158,7 +158,11 @@ function saveTechAvailabilityModal() {
     const available = !!document.getElementById(`avail-${day}`)?.checked;
     const startTime = document.getElementById(`start-${day}`)?.value || '08:00';
     const endTime = document.getElementById(`end-${day}`)?.value || '17:00';
-    if (available && startTime >= endTime) {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    const startTotal = (startHour * 60) + startMinute;
+    const endTotal = (endHour * 60) + endMinute;
+    if (available && startTotal >= endTotal) {
       toast(`Please set a later end time for ${DAY_LABELS[day]}.`);
       return;
     }
@@ -366,7 +370,7 @@ function confirmAppointment(techUsername, techName) {
 function openTechScheduleView() {
   const tech = currentTechAccount;
   if (!tech) return;
-  const techAppts = techSchedules[tech.username] || [];
+  const techAppts = (techSchedules[tech.username] || []).filter(apt => apt.status !== 'cancelled');
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:8500;padding:20px;overflow:auto';
   modal.innerHTML = `<div style="background:var(--card);border-radius:20px;padding:28px;width:100%;max-width:700px;border:1px solid var(--border);max-height:90vh;overflow:auto">
