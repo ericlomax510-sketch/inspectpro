@@ -102,10 +102,10 @@ function openTechAvailabilityModal() {
       const d = availability[day];
       return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <input type="checkbox" id="avail-${day}" ${d.available ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer">
+          <input type="checkbox" id="avail-${day}" ${d.available ? 'checked' : ''} onchange="toggleAvailabilityInputs('${day}', this.checked)" style="width:18px;height:18px;cursor:pointer">
           <label for="avail-${day}" style="flex:1;font-weight:700;cursor:pointer">${DAY_LABELS[day]}</label>
         </div>
-        <div style="display:flex;gap:8px">
+        <div id="avail-time-row-${day}" style="display:flex;gap:8px;opacity:${d.available ? '1' : '.45'};pointer-events:${d.available ? 'auto' : 'none'}">
           <div style="flex:1">
             <label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px">Start</label>
             <select id="start-${day}" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:13px">${options}</select>
@@ -131,6 +131,13 @@ function openTechAvailabilityModal() {
     if (startEl) startEl.value = d.startTime;
     if (endEl) endEl.value = d.endTime;
   });
+}
+
+function toggleAvailabilityInputs(day, isAvailable) {
+  const row = document.getElementById(`avail-time-row-${day}`);
+  if (!row) return;
+  row.style.opacity = isAvailable ? '1' : '.45';
+  row.style.pointerEvents = isAvailable ? 'auto' : 'none';
 }
 
 function saveTechAvailabilityModal() {

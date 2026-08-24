@@ -466,7 +466,12 @@ function testCancellation(testCustomer) {
       a.status !== 'cancelled'
     );
 
-    console.log(`Booked slot exists: ${duplicateExists ? 'YES ✓' : 'NO ✗'}`);
+    if (!duplicateExists) {
+      console.error(`✗ Expected locked slot at ${dateStr} ${formatTime12Hour('08:00')} but none found.`);
+      throw new Error('Scheduling slot lock check failed.');
+    }
+
+    console.log(`Booked slot exists: YES ✓`);
     console.log(`Second customer should be blocked from booking ${formatTime12Hour('08:00')} on ${dateStr}`);
     console.log('\n✅ TEST 8 PASSED: Scheduling format, availability, and slot lock checks are valid!\n');
   }
