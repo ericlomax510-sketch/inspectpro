@@ -26,7 +26,7 @@ function showTechnicianTerms() {
     </ul>
     
     <p><strong>2. Booking Fee</strong></p>
-    <p>Customers pay a $3.00 booking fee when you accept their job. This fee is non-refundable unless you decline the job.</p>
+    <p>Customers pay a $3.00 booking fee when you accept their job. If you decline after a charge, InspectPro triggers an automatic refund and logs the refund event.</p>
     
     <p><strong>3. Data & Photos</strong></p>
     <p>All inspection photos, videos, and customer information is protected and stored securely on your device. You agree not to share customer data with third parties.</p>
@@ -64,7 +64,7 @@ function showCustomerTerms() {
     <h4 style="color:var(--blue);margin-top:0">Customer Terms of Service & Privacy</h4>
     
     <p><strong>1. Booking Fee</strong></p>
-    <p>When you submit an inspection request and a technician accepts, a $3.00 booking fee will be charged to your payment method. This fee is non-refundable unless the technician declines the job.</p>
+    <p>When you submit an inspection request and a technician accepts, a $3.00 booking fee will be charged to your payment method. If the technician declines the job after charge, InspectPro automatically starts a refund to the same payment method.</p>
     
     <p><strong>2. Your Data & Privacy</strong></p>
     <p>We respect your privacy. Your personal data (name, phone, email, vehicle info) is:</p>

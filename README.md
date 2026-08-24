@@ -145,7 +145,33 @@ No backend required! All data is stored locally in **browser localStorage**.
 
 To enable **optional** Stripe payments:
 - Get API keys from [stripe.com](https://stripe.com)
-- Update `STRIPE_PK` in `app.js` line 1140
+- Create a `.env` file in the project root (copy from `.env.example`) and set:
+  - `STRIPE_PUBLIC_KEY`
+  - `STRIPE_BOOKING_PRICE_ID`
+  - `SUPABASE_BOOKING_FEE_ENDPOINT`
+  - `SUPABASE_REFUND_ENDPOINT`
+  - `SUPABASE_PAYMENT_AUDIT_ENDPOINT`
+- Build web assets (this now generates `www/env.js` from your environment values):
+  - `npm run build:web`
+- Deploy Supabase Edge Functions in `supabase/functions/` for:
+  - `charge-booking-fee` (charge on acceptance)
+  - `refund-booking-fee` (automatic/manual refunds)
+  - `payment-audit` (payment/refund event logging)
+  - `stripe-webhook` (Stripe reconciliation updates)
+
+### Supabase Function Deployment Commands
+
+```bash
+supabase login
+supabase link --project-ref <your-supabase-project-ref>
+supabase secrets set STRIPE_SECRET_KEY=<your_secret_key> STRIPE_WEBHOOK_SECRET=<your_webhook_secret> SUPABASE_URL=https://<your-project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<your_service_role_key>
+for fn in refund-booking-fee payment-audit stripe-webhook; do supabase functions deploy "$fn"; done
+```
+
+### Refund Behavior
+- Booking fee is charged when a technician accepts a job.
+- If a technician declines after charge, the app triggers an automatic refund.
+- Admin users can issue manual booking-fee refunds with a required reason.
 
 ---
 
