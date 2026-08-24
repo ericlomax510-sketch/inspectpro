@@ -22,6 +22,10 @@ Deno.serve(async (req) => {
       const charge = event.data.object as Stripe.Charge;
       const paymentEventId = charge.metadata?.paymentEventId;
       if (paymentEventId) {
+        const refunds = charge.refunds?.data || [];
+        const matchedRefund = refunds.find(r => r.metadata?.paymentEventId === paymentEventId)
+          || refunds.slice().sort((a, b) => b.created - a.created)[0];
+
         const { data: currentRow } = await supabase
           .from('payment_events')
           .select('metadata')
@@ -37,7 +41,7 @@ Deno.serve(async (req) => {
           .from('payment_events')
           .update({
             event_type: 'refund_succeeded',
-            stripe_refund_id: charge.refunds?.data?.[charge.refunds.data.length - 1]?.id || null,
+            stripe_refund_id: matchedRefund?.id || null,
             metadata: mergedMetadata
           })
           .eq('payment_event_id', paymentEventId);
