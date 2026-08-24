@@ -74,6 +74,7 @@
       <button class="top-tab"        id="ttab-inspection" onclick="gotoScreen('inspection')">🔍 Inspect</button>
       <button class="top-tab"        id="ttab-customers"  onclick="gotoScreen('customers')">📋 Records</button>
       <button class="top-tab"        id="ttab-pricing"    onclick="gotoScreen('pricing')">💰 Pricing</button>
+      <button class="top-tab"        id="ttab-schedule"   onclick="gotoScreen('schedule')">📅 Schedule</button>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.4)" id="topbar-user"></div>
     <button class="logout-btn" onclick="logout()">Logout</button>
@@ -241,6 +242,19 @@
         </div>
       </div>
 
+      <!-- SCHEDULE -->
+      <div class="screen" id="screen-schedule">
+        <div class="section-heading"><h2>My Schedule</h2><div style="flex:1"></div><button class="btn btn-accent" onclick="openTechAvailabilityModal()">⚙️ Edit Availability</button></div>
+        <div class="card">
+          <div class="card-title">Weekly Availability</div>
+          <div id="tech-schedule-summary"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Appointments</div>
+          <button class="btn btn-dark" style="width:100%;justify-content:center" onclick="openTechScheduleView()">View Scheduled Appointments</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -333,6 +347,12 @@
         <div id="send-to-results" style="margin-top:10px"></div>
       </div>
     </div>
+    <div class="portal-card" id="portal-scheduling-card" style="display:none;border-color:rgba(34,214,122,.2)">
+      <div class="pc-title" style="color:#22d67a">📅 Appointment Scheduling</div>
+      <div id="portal-scheduling-tech-summary" style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:10px"></div>
+      <button class="portal-btn portal-btn-accent" onclick="openSchedulingModal(portalSelectedTech.username, portalSelectedTech.name)" style="width:100%;justify-content:center">Choose Date & Time</button>
+      <div id="portal-selected-slot" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(34,214,122,.08);border:1px solid rgba(34,214,122,.25);font-size:12px;color:#fff"></div>
+    </div>
     <div class="portal-card">
       <div class="pc-title">💳 My Subscriptions</div>
       <button onclick="renderSubscriptionManagementScreen()" class="portal-btn" style="width:100%;background:var(--accent);color:var(--dark);font-weight:800">Manage Subscriptions</button>
@@ -420,6 +440,7 @@
 <div id="marker-list" style="display:none"></div>
 
 <script src="app.js"></script>
+<script src="scheduling.js"></script>
 <script src="checkout.js"></script>
 <script src="subscriptions.js"></script>
 <script src="mechanic-radius.js"></script>

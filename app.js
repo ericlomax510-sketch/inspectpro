@@ -128,6 +128,7 @@ function enterTechMode() {
   document.getElementById('tech-app').style.display    = 'flex';
   document.getElementById('cust-portal').classList.remove('active');
   document.getElementById('topbar-user').textContent   = '👤 ' + (currentTechAccount?.name||'');
+  if (typeof initTechAvailability === 'function' && currentTechAccount?.username) initTechAvailability(currentTechAccount.username);
   buildStepNav(); renderHomeScreen(); renderInbox();
 }
 
@@ -146,6 +147,8 @@ function enterCustomerPortal(profile) {
   const vp=document.getElementById('portal-video-preview'); if(vp){vp.src='';vp.style.display='none';}
   const vs=document.getElementById('portal-video-status'); if(vs) vs.textContent='';
   portalSelectedTech=null; portalSelectedServices=[];
+  window.selectedScheduleDate = null;
+  window.selectedScheduleTime = null;
   buildPortalServicesGrid(); initSendToSection(profile);
   const reportCard=document.getElementById('portal-car-report-card');
   if(profile.carReport){ reportCard.style.display='block'; renderCustomerCarReport(profile.carReport); }
@@ -285,7 +288,7 @@ function gotoScreen(s) {
   document.querySelectorAll('#main>.screen').forEach(el=>el.classList.remove('active'));
   const target = document.getElementById('screen-'+s);
   if (target) target.classList.add('active');
-  ['home','inbox','inspection','customers','pricing','accounts'].forEach(n=>{
+  ['home','inbox','inspection','customers','pricing','schedule','accounts'].forEach(n=>{
     const t=document.getElementById('ttab-'+n); if(t) t.classList.toggle('active', n===s);
   });
   document.getElementById('sidebar').style.display = s==='inspection' ? 'flex' : 'none';
@@ -294,6 +297,7 @@ function gotoScreen(s) {
   if (s==='accounts')   renderAccountsScreen();
   if (s==='pricing')    buildPriceEditor();
   if (s==='inbox')      renderInbox();
+  if (s==='schedule' && typeof renderTechScheduleScreen === 'function') renderTechScheduleScreen();
 }
 
 // ══════════════════════════════════════════
@@ -992,6 +996,8 @@ function portalHandleVideo(input){
 
 function initSendToSection(profile){
   portalSelectedTech=null;
+  window.selectedScheduleDate = null;
+  window.selectedScheduleTime = null;
   const prevRow=document.getElementById('previous-tech-row');
   const prevBtn=document.getElementById('prev-tech-btn');
   if(profile.preferredMechanic){
@@ -1008,6 +1014,7 @@ function initSendToSection(profile){
   } else if(prevRow) { prevRow.style.display='none'; }
   const si=document.getElementById('send-search-input'); if(si) si.value='';
   const sr=document.getElementById('send-to-results'); if(sr) sr.innerHTML='';
+  if (typeof updatePortalSchedulingCard === 'function') updatePortalSchedulingCard();
   updateSubmitBtn();
 }
 
@@ -1019,16 +1026,22 @@ function sendToSearch(query){
   if(!matches.length){results.innerHTML=`<div style="font-size:13px;color:rgba(255,255,255,.3);padding:10px 0;text-align:center">No technician found for "${query}"</div>`;return;}
   results.innerHTML=matches.map(a=>{
     const initials=a.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+    const availText = typeof getTechAvailabilitySummaryText === 'function' ? getTechAvailabilitySummaryText(a.username) : '';
     return `<div onclick="setSendToTech('${a.username}','${a.name}')" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer">
       <div style="width:38px;height:38px;border-radius:10px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#e8ff47;flex-shrink:0">${initials}</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:13px;color:#fff">${a.name}</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">@${a.username} · ${getPortalStars(a.username)}</div></div>
+      <div style="flex:1"><div style="font-weight:700;font-size:13px;color:#fff">${a.name}</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">@${a.username} · ${getPortalStars(a.username)}</div>${availText?`<div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:4px">${availText}</div>`:''}</div>
       <div style="font-size:11px;font-weight:700;color:rgba(232,255,71,.7);background:rgba(232,255,71,.08);padding:4px 10px;border-radius:20px">Select →</div>
     </div>`;
   }).join('');
 }
 
 function setSendToTech(username,name){
+  const prevTech = portalSelectedTech?.username;
   portalSelectedTech={username,name};
+  if (prevTech !== username) {
+    window.selectedScheduleDate = null;
+    window.selectedScheduleTime = null;
+  }
   const sel=document.getElementById('send-to-selected');
   const picker=document.getElementById('send-to-picker');
   const avatar=document.getElementById('sts-avatar');
@@ -1042,11 +1055,14 @@ function setSendToTech(username,name){
   if(picker) picker.style.display='none';
   const profileIdx=custProfiles.findIndex(p=>p.id===currentCustPortalId);
   if(profileIdx>=0){custProfiles[profileIdx].preferredMechanic=username;custProfiles[profileIdx].preferredMechanicName=name;saveCustProfiles();}
+  if (typeof updatePortalSchedulingCard === 'function') updatePortalSchedulingCard();
   updateSubmitBtn(); toast('✓ Sending to '+name);
 }
 
 function clearSelectedTech(){
   portalSelectedTech=null;
+  window.selectedScheduleDate = null;
+  window.selectedScheduleTime = null;
   const sel=document.getElementById('send-to-selected');
   const picker=document.getElementById('send-to-picker');
   const si=document.getElementById('send-search-input');
@@ -1055,6 +1071,7 @@ function clearSelectedTech(){
   if(picker) picker.style.display='block';
   if(si) si.value='';
   if(sr) sr.innerHTML='';
+  if (typeof updatePortalSchedulingCard === 'function') updatePortalSchedulingCard();
   updateSubmitBtn();
 }
 
@@ -1062,10 +1079,14 @@ function updateSubmitBtn(){
   const btn=document.getElementById('portal-submit-btn');
   const status=document.getElementById('submit-bar-status');
   if(!btn) return;
-  if(portalSelectedTech){
+  if(portalSelectedTech && window.selectedScheduleDate && window.selectedScheduleTime){
     btn.disabled=false; btn.style.background='var(--accent)'; btn.style.color='var(--dark)'; btn.style.cursor='pointer';
     btn.textContent='✓ Submit to '+portalSelectedTech.name;
     if(status){status.style.color='rgba(34,214,122,.8)';status.textContent='✓ Ready to send to '+portalSelectedTech.name;}
+  } else if (portalSelectedTech) {
+    btn.disabled=true; btn.style.background='rgba(255,255,255,.08)'; btn.style.color='rgba(255,255,255,.25)'; btn.style.cursor='not-allowed';
+    btn.textContent='✓ Submit';
+    if(status){status.style.color='rgba(255,184,0,.8)';status.textContent='⚠ Pick an appointment date and time to continue';}
   } else {
     btn.disabled=true; btn.style.background='rgba(255,255,255,.08)'; btn.style.color='rgba(255,255,255,.25)'; btn.style.cursor='not-allowed';
     btn.textContent='✓ Submit';
@@ -1084,9 +1105,10 @@ function searchTechnicians(query){
   results.innerHTML=matches.map(a=>{
     const initials=a.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
     const isSelected=currentMech===a.username;
+    const availText = typeof getTechAvailabilitySummaryText === 'function' ? getTechAvailabilitySummaryText(a.username) : '';
     return `<div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid ${isSelected?'rgba(232,255,71,.3)':'rgba(255,255,255,.09)'};border-radius:12px;padding:14px;margin-bottom:8px;${isSelected?'background:rgba(232,255,71,.06)':''}">
       <div style="width:44px;height:44px;border-radius:12px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#e8ff47;flex-shrink:0">${initials}</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:14px;color:#fff">${a.name}</div><div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${getPortalStars(a.username)}</div></div>
+      <div style="flex:1"><div style="font-weight:700;font-size:14px;color:#fff">${a.name}</div><div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${getPortalStars(a.username)}</div>${availText?`<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:5px">${availText}</div>`:''}</div>
       ${isSelected?`<div style="background:rgba(232,255,71,.15);border:1px solid rgba(232,255,71,.3);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#e8ff47">✓ Your Mechanic</div>`
         :`<button onclick="selectMechanic('${a.username}','${a.name}')" style="background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:#e8ff47;cursor:pointer">Select</button>`}
     </div>`;
@@ -1254,6 +1276,15 @@ function submitPortal() {
     if (c) { c.style.borderColor='rgba(255,59,59,.6)'; setTimeout(()=>{ c.style.borderColor='rgba(232,255,71,.25)'; }, 1800); }
     return;
   }
+  if (!window.selectedScheduleDate || !window.selectedScheduleTime) {
+    toast('Please schedule an appointment date and time first.');
+    const scheduleCard = document.getElementById('portal-scheduling-card');
+    if (scheduleCard) {
+      scheduleCard.style.borderColor='rgba(255,59,59,.6)';
+      setTimeout(()=>{ scheduleCard.style.borderColor='rgba(34,214,122,.2)'; }, 1800);
+    }
+    return;
+  }
 
   // Check if customer has a card on file
   const profile = custProfiles.find(p => p.id === currentCustPortalId);
@@ -1275,6 +1306,10 @@ function submitPortal() {
     const techName = portalSelectedTech.name;
     const techUsername = portalSelectedTech.username;
     const svcsCopy = [...portalSelectedServices];
+    const selectedDate = window.selectedScheduleDate;
+    const selectedTime = window.selectedScheduleTime;
+    const selectedTimeLabel = (typeof formatTime12Hour === 'function' ? formatTime12Hour(selectedTime) : selectedTime);
+    const selectedDateLabel = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', weekday:'short' });
 
     const save = (videoDataUrl) => {
       const pIdx = custProfiles.findIndex(p => p.id === currentCustPortalId);
@@ -1285,6 +1320,9 @@ function submitPortal() {
         tires: hasTires ? tires : null, comments,
         requestedServices: svcsCopy,
         sentToTech: techUsername, sentToTechName: techName,
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTime,
+        appointmentTimeLabel: selectedTimeLabel,
         paymentMethodId: paymentMethodId || custProfiles[pIdx].stripePaymentMethodId,
         bookingFeePending: true
       });
@@ -1292,6 +1330,8 @@ function submitPortal() {
       custProfiles[pIdx].preferredMechanicName = techName;
       saveCustProfiles();
       portalPhotos=[]; portalVideoBlob=null; portalSelectedTech=null; portalSelectedServices=[];
+      window.selectedScheduleDate = null;
+      window.selectedScheduleTime = null;
       toast('✓ Submitted to ' + techName + '!');
       const content = document.getElementById('portal-content');
       if (content) content.innerHTML = `
@@ -1300,6 +1340,7 @@ function submitPortal() {
           <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:8px">Submitted!</div>
           <div style="font-size:14px;color:rgba(255,255,255,.5);max-width:320px;line-height:1.8;margin-bottom:8px">
             Sent to <strong style="color:#e8ff47">${techName}</strong>.<br>
+            Appointment: <strong style="color:#e8ff47">${selectedDateLabel}</strong> at <strong style="color:#e8ff47">${selectedTimeLabel}</strong><br>
             The ${BOOKING_FEE_LABEL} will only be charged if they accept.
           </div>
           <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:rgba(255,255,255,.4)">
