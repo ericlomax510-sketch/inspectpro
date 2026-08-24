@@ -17,9 +17,10 @@ Deno.serve(async (req) => {
     if (!stripeKey) throw new Error('Missing STRIPE_SECRET_KEY');
 
     const chargeId = body.chargeId;
+    const paymentIntentId = body.paymentIntentId;
     const idempotencyKey = body.idempotencyKey;
-    if (!chargeId || !idempotencyKey || !body.paymentEventId) {
-      return new Response(JSON.stringify({ error: 'chargeId, paymentEventId, and idempotencyKey are required' }), {
+    if ((!chargeId && !paymentIntentId) || !idempotencyKey || !body.paymentEventId) {
+      return new Response(JSON.stringify({ error: 'chargeId or paymentIntentId, paymentEventId, and idempotencyKey are required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -45,8 +46,7 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const refund = await stripe.refunds.create({
-      charge: chargeId,
+    const refundParams: Stripe.RefundCreateParams = {
       amount: body.amountCents || undefined,
       reason: 'requested_by_customer',
       metadata: {
@@ -55,7 +55,12 @@ Deno.serve(async (req) => {
         reason: body.reason || 'not-specified',
         initiatedBy: body.initiatedBy || 'system'
       }
-    }, {
+    };
+
+    if (chargeId) refundParams.charge = chargeId;
+    if (!chargeId && paymentIntentId) refundParams.payment_intent = paymentIntentId;
+
+    const refund = await stripe.refunds.create(refundParams, {
       idempotencyKey
     });
 
@@ -65,7 +70,7 @@ Deno.serve(async (req) => {
       .from('refund_events')
       .upsert({
         payment_event_id: body.paymentEventId,
-        stripe_charge_id: chargeId,
+        stripe_charge_id: chargeId || null,
         stripe_refund_id: refund.id,
         amount_cents: body.amountCents || 300,
         currency: body.currency || 'usd',

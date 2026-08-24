@@ -779,7 +779,7 @@ function renderInbox(){
         <div style="flex:1;background:rgba(34,214,122,.08);border:1px solid rgba(34,214,122,.2);border-radius:8px;padding:10px;font-size:13px;color:var(--green);font-weight:600;text-align:center">✓ Accepted</div>
         <button class="btn btn-dark" onclick="startInspectionFromJob('${profile.id}',${subIdx})">📋 Start Inspection</button>
       </div>`:''}
-      ${status==='accepted' && currentTechAccount?.role==='admin' && sub.bookingFeeStatus==='charged' && sub.bookingFeeRefundStatus!=='succeeded' ? `
+      ${(status==='accepted' || status==='declined') && currentTechAccount?.role==='admin' && sub.bookingFeeStatus==='charged' && sub.bookingFeeRefundStatus!=='succeeded' ? `
       <div style="margin-top:8px">
         <button class="btn btn-ghost" style="width:100%;justify-content:center;border-color:rgba(255,184,0,.4);color:#ffb800" onclick="openManualRefundModal('${profile.id}',${subIdx})">↩ Manual Refund</button>
       </div>` : ''}
@@ -1481,7 +1481,7 @@ async function chargeBookingFee(profileId, subIdx) {
     sub.bookingFeeStatus = 'charged';
     sub.bookingFeePending = false;
     sub.bookingFeeChargedAt = data.chargedAt || new Date().toISOString();
-    sub.bookingFeeChargeId = data.chargeId || data.paymentIntentId || null;
+    sub.bookingFeeChargeId = typeof data.chargeId === 'string' && data.chargeId.startsWith('ch_') ? data.chargeId : null;
     sub.bookingFeePaymentIntentId = data.paymentIntentId || null;
     sub.bookingFeeError = null;
     saveCustProfiles();
@@ -1515,7 +1515,15 @@ function ensurePaymentEventId(submission, profileId, subIdx) {
 function normalizeSubmissionPaymentState(submission) {
   if (!submission || typeof submission !== 'object') return submission;
   if (submission.bookingFeeStatus == null) {
-    submission.bookingFeeStatus = submission.bookingFeePending === false ? 'charged' : 'pending';
+    if (submission.bookingFeeRefundStatus === 'succeeded') {
+      submission.bookingFeeStatus = 'refunded';
+    } else if (submission.bookingFeeChargeId || submission.bookingFeePaymentIntentId || submission.bookingFeePending === false) {
+      submission.bookingFeeStatus = 'charged';
+    } else if (submission.bookingFeeError) {
+      submission.bookingFeeStatus = 'failed';
+    } else {
+      submission.bookingFeeStatus = 'pending';
+    }
   }
   if (submission.bookingFeePending == null) {
     submission.bookingFeePending = submission.bookingFeeStatus !== 'charged' && submission.bookingFeeStatus !== 'refunded';
@@ -1534,8 +1542,9 @@ async function requestBookingFeeRefund(profileId, subIdx, refundType, reason) {
   normalizeSubmissionPaymentState(sub);
   if (sub.bookingFeeRefundStatus === 'succeeded') return true;
 
-  const chargeId = sub.bookingFeeChargeId || sub.bookingFeePaymentIntentId;
-  if (!chargeId) return false;
+  const chargeId = sub.bookingFeeChargeId || null;
+  const paymentIntentId = sub.bookingFeePaymentIntentId || null;
+  if (!chargeId && !paymentIntentId) return false;
 
   sub.bookingFeeRefundStatus = 'pending';
   sub.bookingFeeRefundReason = reason || 'not-specified';
@@ -1549,6 +1558,7 @@ async function requestBookingFeeRefund(profileId, subIdx, refundType, reason) {
       body: JSON.stringify({
         paymentEventId,
         chargeId,
+        paymentIntentId,
         amountCents: 300,
         currency: 'usd',
         reason: reason || 'not-specified',
@@ -1577,6 +1587,7 @@ async function requestBookingFeeRefund(profileId, subIdx, refundType, reason) {
       amountCents: 300,
       currency: 'usd',
       stripeChargeId: chargeId,
+      stripePaymentIntentId: paymentIntentId,
       stripeRefundId: sub.bookingFeeRefundId,
       refundType: refundType || 'manual',
       reason: reason || 'not-specified'
