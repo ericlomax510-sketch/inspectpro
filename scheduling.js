@@ -36,6 +36,15 @@ function getThirtyMinuteTimes() {
       const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
       times.push({ value, label: formatTime12Hour(value) });
     }
+
+    function isSlotBooked(techUsername, dateStr, timeValue) {
+      return customerAppointments.some(a =>
+        a.techUsername === techUsername &&
+        a.date === dateStr &&
+        (a.timeSlot || a.time) === timeValue &&
+        a.status !== 'cancelled'
+      );
+    }
   }
   return times;
 }
@@ -281,16 +290,12 @@ function populateTimeDropdown(techUsername, dateStr) {
   const [eh, em] = daySchedule.endTime.split(':').map(Number);
   const startMinutes = (sh * 60) + sm;
   const endMinutes = (eh * 60) + em;
-  const booked = customerAppointments
-    .filter(a => a.techUsername === techUsername && a.date === dateStr && a.status !== 'cancelled')
-    .map(a => a.timeSlot || a.time);
-
   const slotOptions = [];
   for (let minutes = startMinutes; minutes < endMinutes; minutes += 30) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    if (!booked.includes(value)) {
+    if (!isSlotBooked(techUsername, dateStr, value)) {
       slotOptions.push(`<option value="${value}">${formatTime12Hour(value)}</option>`);
     }
   }
@@ -311,12 +316,7 @@ function confirmAppointment(techUsername, techName) {
   const profile = custProfiles.find(p => p.id === currentCustPortalId);
   if (!profile) return;
 
-  const duplicate = customerAppointments.some(a =>
-    a.techUsername === techUsername &&
-    a.date === window.selectedScheduleDate &&
-    (a.timeSlot || a.time) === window.selectedScheduleTime &&
-    a.status !== 'cancelled'
-  );
+  const duplicate = isSlotBooked(techUsername, window.selectedScheduleDate, window.selectedScheduleTime);
   if (duplicate) {
     toast('That time was just booked. Please choose another slot.');
     populateTimeDropdown(techUsername, window.selectedScheduleDate);
@@ -419,7 +419,7 @@ function cancelAppointment(index) {
   const techAppts = techSchedules[tech.username] || [];
   if (techAppts[index]) {
     const aptId = techAppts[index].id;
-    techAppts.splice(index, 1);
+    techAppts[index].status = 'cancelled';
     saveTechSchedules();
     const custIdx = customerAppointments.findIndex(a => a.id === aptId);
     if (custIdx >= 0) {

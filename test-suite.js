@@ -428,7 +428,7 @@ function testCancellation(testCustomer) {
     console.log('\n📅 TEST 8: SCHEDULING AVAILABILITY + BOOKING LOCK');
     console.log('═══════════════════════════════════════════════════\n');
 
-    if (typeof initTechAvailability !== 'function' || typeof formatTime12Hour !== 'function') {
+    if (typeof initTechAvailability !== 'function' || typeof formatTime12Hour !== 'function' || typeof isSlotBooked !== 'function') {
       console.log('⚠ Scheduling module not loaded - skipping scheduling test.\n');
       return;
     }
@@ -459,19 +459,34 @@ function testCancellation(testCustomer) {
     });
     saveCustomerAppointments();
 
-    const duplicateExists = customerAppointments.some(a =>
-      a.techUsername === techUsername &&
-      a.date === dateStr &&
-      (a.timeSlot || a.time) === '08:00' &&
-      a.status !== 'cancelled'
-    );
-
+    const duplicateExists = isSlotBooked(techUsername, dateStr, '08:00');
     if (!duplicateExists) {
       console.error(`✗ Expected locked slot at ${dateStr} ${formatTime12Hour('08:00')} but none found.`);
       throw new Error('Scheduling slot lock check failed.');
     }
 
+    const beforeCount = customerAppointments.length;
+    const canSecondCustomerBook = !isSlotBooked(techUsername, dateStr, '08:00');
+    if (canSecondCustomerBook) {
+      customerAppointments.push({
+        id: 777002,
+        techId: 999001,
+        techUsername,
+        customerId: 888002,
+        date: dateStr,
+        time: '08:00',
+        timeSlot: '08:00',
+        status: 'scheduled'
+      });
+    }
+    const afterCount = customerAppointments.length;
+    if (canSecondCustomerBook || afterCount !== beforeCount) {
+      console.error('✗ Double-booking prevention failed for same tech/date/time.');
+      throw new Error('Double-booking prevention failed.');
+    }
+
     console.log(`Booked slot exists: YES ✓`);
+    console.log('Second booking attempt for same slot: BLOCKED ✓');
     console.log(`Second customer should be blocked from booking ${formatTime12Hour('08:00')} on ${dateStr}`);
     console.log('\n✅ TEST 8 PASSED: Scheduling format, availability, and slot lock checks are valid!\n');
   }
