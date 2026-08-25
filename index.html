@@ -13,7 +13,7 @@
 <!-- LOGIN -->
 <div id="login-gate">
   <div class="login-box">
-    <div class="login-logo">Inspect<span>Pro</span></div>
+    <div class="login-logo"><img src="assets/logo.svg" alt="InspectPro" class="logo-img logo-img-lg"></div>
     <div class="login-sub">Select your role to continue</div>
     <div class="login-mode-btns">
       <button class="lmode-btn active" id="mode-tech-btn" onclick="switchMode('tech')">🔧 Technician</button>
@@ -67,7 +67,7 @@
 <!-- TECH APP -->
 <div id="tech-app" style="display:none;flex-direction:column;height:100vh">
   <div id="topbar">
-    <div class="logo">Inspect<span>Pro</span></div>
+    <div class="logo"><img src="assets/logo.svg" alt="InspectPro" class="logo-img"></div>
     <div style="display:flex;gap:4px;flex-wrap:wrap">
       <button class="top-tab active" id="ttab-home"       onclick="gotoScreen('home')">🏠 Home</button>
       <button class="top-tab"        id="ttab-inbox"      onclick="gotoScreen('inbox')">📥 Inbox <span id="inbox-badge-count" style="display:none;background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
@@ -248,7 +248,7 @@
 <!-- CUSTOMER PORTAL -->
 <div id="cust-portal">
   <div class="portal-header">
-    <div class="logo" style="font-size:18px">Inspect<span>Pro</span></div>
+    <div class="logo"><img src="assets/logo.svg" alt="InspectPro" class="logo-img"></div>
     <div id="portal-greeting" style="font-size:13px;color:rgba(255,255,255,.5)"></div>
     <div style="flex:1"></div>
     <button class="logout-btn" onclick="logout()">Exit</button>

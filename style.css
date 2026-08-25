@@ -1,3 +1,8 @@
+/* LOGO IMAGE */
+.logo-img{display:block;height:28px;width:auto;}
+.logo-img-lg{height:40px;}
+.logo-img-receipt{height:24px;}
+
 /* BASE */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Mulish',-apple-system,BlinkMacSystemFont,sans-serif;background:#1a1a2e;color:#fff;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
