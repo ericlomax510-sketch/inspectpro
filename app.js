@@ -489,7 +489,10 @@ function buildReceiptPreview(){
   const issueRows=(items,color,lbl)=>items.map(n=>`<div class="issue-row"><div style="width:10px;height:10px;border-radius:3px;background:${color};flex-shrink:0;margin-top:2px"></div><span style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;width:60px;flex-shrink:0">${lbl}</span><span>${n}</span></div>`).join('');
   document.getElementById('receipt-preview').innerHTML=`
     <div class="receipt">
-      <div class="receipt-logo">Inspect<span>Pro</span></div>
+      <div class="receipt-logo brand-lockup">
+        <img src="assets/logo.svg" alt="InspectPro logo" class="brand-logo-icon">
+        <span class="brand-name">Inspect<span>Pro</span></span>
+      </div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">VEHICLE INSPECTION REPORT</div>
       <hr class="receipt-divider">
       <div class="receipt-row"><span class="rlabel">Customer</span><span class="rval">${name}</span></div>
