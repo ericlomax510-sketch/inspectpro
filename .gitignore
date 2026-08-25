@@ -19,6 +19,7 @@ yarn.lock
 # Build output
 dist/
 build/
+www/
 
 # Logs
 *.log
