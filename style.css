@@ -106,7 +106,7 @@ html{scroll-behavior:smooth;}
 .receipt{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;font-size:13px;line-height:1.6;}
 .receipt-logo{margin-bottom:4px;}
 .brand-logo{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;}
-.logo-img{height:32px;width:auto;display:block;flex-shrink:0;}
+.logo-img{height:32px;width:auto;flex-shrink:0;}
 .logo-img-lg{height:44px;}
 .logo-img-sm{height:28px;}
 .logo-wordmark{font-family:'Syne',sans-serif;font-weight:900;font-size:18px;letter-spacing:-.5px;line-height:1;white-space:nowrap;}
