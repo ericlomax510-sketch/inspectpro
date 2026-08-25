@@ -1,0 +1,252 @@
+<!-- 
+  AGENTS/TECH FEATURES UI MODULE
+  Add these elements to your index.html in the appropriate sections
+  
+  Features included:
+  1. Customer tech rating after job
+  2. Tech earnings dashboard
+  3. Search/filter records
+  4. Job history per customer
+  5. Notification badge
+  6. Admin tech records viewer
+-->
+
+<!-- Add to the topbar section for notifications -->
+<div id="notification-center-btn" style="position:relative;cursor:pointer;display:flex;align-items:center;gap:8px" onclick="renderNotificationCenter()">
+  <span style="font-size:20px">🔔</span>
+  <span id="notification-badge" style="position:absolute;top:-4px;right:-4px;background:#e8ff47;color:#1a1a2e;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span>
+</div>
+
+<!-- RECORDS FILTER PANEL - Add to customers screen -->
+<div id="records-filter-panel" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;display:none">
+  <div style="font-size:12px;font-weight:700;margin-bottom:12px">🔍 Filter Records</div>
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+    <input type="text" id="filter-search" placeholder="Search name, vehicle, phone..." 
+      style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text)"
+      oninput="applyRecordFilter(this.value, document.getElementById('filter-status').value, document.getElementById('filter-from').value, document.getElementById('filter-to').value)">
+    
+    <select id="filter-status" style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text)"
+      onchange="applyRecordFilter(document.getElementById('filter-search').value, this.value, document.getElementById('filter-from').value, document.getElementById('filter-to').value)">
+      <option value="all">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="accepted">Accepted</option>
+      <option value="declined">Declined</option>
+    </select>
+    
+    <input type="date" id="filter-from" placeholder="From date"
+      style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text)"
+      onchange="applyRecordFilter(document.getElementById('filter-search').value, document.getElementById('filter-status').value, this.value, document.getElementById('filter-to').value)">
+    
+    <input type="date" id="filter-to" placeholder="To date"
+      style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text)"
+      onchange="applyRecordFilter(document.getElementById('filter-search').value, document.getElementById('filter-status').value, document.getElementById('filter-from').value, this.value)">
+  </div>
+  
+  <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+    <select style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text)"
+      onchange="recordFilters.sortBy = this.value; renderFilteredRecords()">
+      <option value="date-desc">Newest First</option>
+      <option value="date-asc">Oldest First</option>
+      <option value="name-asc">Name (A-Z)</option>
+    </select>
+    
+    <div id="filter-results-count" style="font-size:12px;color:var(--muted)">Records</div>
+    
+    <button class="btn btn-ghost" style="font-size:11px;padding:6px 12px"
+      onclick="document.getElementById('records-filter-panel').style.display='none';renderCustomers()">Clear</button>
+  </div>
+</div>
+
+<!-- ADMIN TECH DASHBOARD - Add as a new screen -->
+<div id="screen-tech-dashboard" class="screen" style="display:none">
+  <div class="screen-header">
+    <h2>📊 Tech Performance Dashboard</h2>
+    <p style="color:var(--muted);font-size:13px;margin-top:6px">View earnings, ratings, and job history for all technicians</p>
+  </div>
+  
+  <div class="screen-content">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
+      <button class="card" style="cursor:pointer;text-align:center;padding:20px" onclick="openAdminTechRecords()">
+        <div style="font-size:32px;margin-bottom:10px">👨‍💼</div>
+        <div style="font-weight:700;font-size:14px">View All Techs</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Records & analytics</div>
+      </button>
+      
+      <button class="card" style="cursor:pointer;text-align:center;padding:20px" onclick="gotoScreen('accounts')">
+        <div style="font-size:32px;margin-bottom:10px">👤</div>
+        <div style="font-weight:700;font-size:14px">Manage Accounts</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Create & edit techs</div>
+      </button>
+      
+      <button class="card" style="cursor:pointer;text-align:center;padding:20px" onclick="gotoScreen('customers')">
+        <div style="font-size:32px;margin-bottom:10px">📋</div>
+        <div style="font-weight:700;font-size:14px">All Records</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Jobs & inspections</div>
+      </button>
+    </div>
+    
+    <div class="section-heading">Quick Stats</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">Total Techs</div>
+        <div style="font-size:24px;font-weight:800;color:#e8ff47" id="stat-total-techs">0</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">Total Earnings</div>
+        <div style="font-size:24px;font-weight:800;color:#22d67a" id="stat-total-earnings">$0.00</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">Total Jobs</div>
+        <div style="font-size:24px;font-weight:800;color:#3b82f6" id="stat-total-jobs">0</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">Avg Rating</div>
+        <div style="font-size:24px;font-weight:800;color:#ffb800" id="stat-avg-rating">0/5</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOB HISTORY WIDGET - Add to customer detail view (after vehicle info card) -->
+<div id="job-history-widget" style="display:none">
+  <!-- Populated by renderCustomerJobHistory() -->
+</div>
+
+<!-- RATING MODAL TRIGGER - Add after job completion in portal -->
+<script>
+// Hook into the job completion flow
+const originalCompleteJob = window.completeJob;
+window.completeJob = function(techUsername, customerId) {
+  if (originalCompleteJob) originalCompleteJob(techUsername, customerId);
+  
+  // Show rating modal after completion
+  setTimeout(() => {
+    openTechRatingModal(customerId, techUsername);
+  }, 500);
+};
+</script>
+
+<!-- EARNINGS DASHBOARD TRIGGER - Add to tech home screen -->
+<button class="card" style="cursor:pointer" onclick="openTechEarningsDashboard()" 
+  id="earnings-dashboard-btn" style="display:none;width:100%;text-align:center;padding:20px">
+  <div style="font-size:32px;margin-bottom:10px">💰</div>
+  <div style="font-weight:700;font-size:16px">Your Earnings</div>
+  <div style="font-size:12px;color:var(--muted);margin-top:6px">View your earnings summary</div>
+</button>
+
+<!-- Add CSS for agent features -->
+<style>
+#notification-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.filter-chip {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(232,255,71,.15);
+  color:#e8ff47;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+  margin:4px;
+}
+
+.tech-rating {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+}
+
+.earning-card {
+  background:rgba(232,255,71,.08);
+  border:1px solid rgba(232,255,71,.2);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+}
+
+.earning-card .label {
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+.earning-card .value {
+  font-family:'Syne',sans-serif;
+  font-size:28px;
+  font-weight:800;
+  color:#e8ff47;
+}
+
+.notification-item {
+  background:var(--bg);
+  border-left:4px solid #e8ff47;
+  border-radius:8px;
+  padding:12px;
+  margin-bottom:8px;
+  font-size:12px;
+}
+
+.notification-item.read {
+  border-left-color:var(--border);
+  opacity:0.7;
+}
+
+.job-history-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.job-history-table th {
+  background:var(--bg);
+  padding:12px;
+  font-weight:700;
+  text-align:left;
+  border-bottom:2px solid var(--border);
+  color:var(--muted);
+}
+
+.job-history-table td {
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+}
+
+.job-history-table tr:hover {
+  background:rgba(255,255,255,.02);
+}
+
+.tech-stat-badge {
+  display:inline-block;
+  background:rgba(232,255,71,.15);
+  color:#e8ff47;
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:700;
+}
+</style>
+
+<!-- Initialize agent features on page load -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initAgentFeatures();
+  
+  // Show earnings button for techs
+  if (currentTechAccount?.role === 'tech') {
+    const btn = document.getElementById('earnings-dashboard-btn');
+    if (btn) btn.style.display = 'flex';
+  }
+});
+</script>

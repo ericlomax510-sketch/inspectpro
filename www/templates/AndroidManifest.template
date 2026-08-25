@@ -1,0 +1,10 @@
+<!-- templates/AndroidManifest.template -->
+<!-- Add the appropriate permissions to android/app/src/main/AndroidManifest.xml if your app uses camera, audio recording, or file access -->
+
+<!-- Example permissions -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+<!-- For Android 11+ prefer scoped storage; consider using the Filesystem plugin which handles platform changes -->

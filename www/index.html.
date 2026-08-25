@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>InspectPro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://js.stripe.com/v3/"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,7 +12,7 @@
 <!-- LOGIN -->
 <div id="login-gate">
   <div class="login-box">
-    <div class="login-logo"><img src="assets/logo.svg" alt="InspectPro" class="logo-img logo-img--login"></div>
+    <div class="login-logo">Inspect<span>Pro</span></div>
     <div class="login-sub">Select your role to continue</div>
     <div class="login-mode-btns">
       <button class="lmode-btn active" id="mode-tech-btn" onclick="switchMode('tech')">🔧 Technician</button>
@@ -25,11 +24,11 @@
         <button class="lmode-btn" id="tech-register-tab" onclick="techTab('register')" style="flex:1;font-size:12px">New Tech</button>
       </div>
       <div id="tech-signin-view">
-        <div class="cust-field"><label>Username</label><input type="text" id="tech-username" placeholder="Your username" autocomplete="username"></div>
-        <div class="cust-field"><label>Password</label><input type="password" id="tech-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')techLogin()"></div>
+        <div class="cust-field"><label>Username</label><input type="text" id="tech-username" placeholder="admin" autocomplete="username"></div>
+        <div class="cust-field"><label>Password</label><input type="password" id="tech-password" placeholder="admin123" autocomplete="current-password" onkeydown="if(event.key==='Enter')techLogin()"></div>
         <button class="cust-enter-btn" onclick="techLogin()">Sign In →</button>
         <div class="login-error" id="pin-error"></div>
-        <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;text-align:center">Contact your admin for login credentials</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.2);margin-top:10px">Default: admin / admin123</div>
       </div>
       <div id="tech-register-view" style="display:none">
         <div class="cust-field"><label>Full Name</label><input type="text" id="tr-name" placeholder="Your full name"></div>
@@ -67,13 +66,14 @@
 <!-- TECH APP -->
 <div id="tech-app" style="display:none;flex-direction:column;height:100vh">
   <div id="topbar">
-    <div class="logo"><img src="assets/logo.svg" alt="InspectPro" class="logo-img logo-img--topbar"></div>
+    <div class="logo">Inspect<span>Pro</span></div>
     <div style="display:flex;gap:4px;flex-wrap:wrap">
       <button class="top-tab active" id="ttab-home"       onclick="gotoScreen('home')">🏠 Home</button>
-      <button class="top-tab"        id="ttab-inbox"      onclick="gotoScreen('inbox')">📥 Inbox <span id="inbox-badge-count" style="display:none;background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
+      <button class="top-tab"        id="ttab-inbox"      onclick="gotoScreen('inbox')">📥 Inbox <span id="inbox-badge-count" style="display:none;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:20px;margin-left:4px"></span></button>
       <button class="top-tab"        id="ttab-inspection" onclick="gotoScreen('inspection')">🔍 Inspect</button>
       <button class="top-tab"        id="ttab-customers"  onclick="gotoScreen('customers')">📋 Records</button>
       <button class="top-tab"        id="ttab-pricing"    onclick="gotoScreen('pricing')">💰 Pricing</button>
+      <button class="top-tab"        id="ttab-accounts"   onclick="gotoScreen('accounts')">🔑 Accounts</button>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.4)" id="topbar-user"></div>
     <button class="logout-btn" onclick="logout()">Logout</button>
@@ -184,13 +184,13 @@
           </div>
           <div class="card" style="border-color:rgba(34,214,122,.25)">
             <div class="card-title" style="color:var(--green)">✅ Post-Job Checklist</div>
-            <div class="postjob-check"><div class="pj-checkbox" id="pj-1" onclick="togglePostJob(1)"></div><div><div class="pj-label">Work completed as described</div><div class="pj-sub">All services rendered</div></div></div>
-            <div class="postjob-check"><div class="pj-checkbox" id="pj-2" onclick="togglePostJob(2)"></div><div><div class="pj-label">Customer informed of all findings</div><div class="pj-sub">Explained all issues</div></div></div>
-            <div class="postjob-check"><div class="pj-checkbox" id="pj-3" onclick="togglePostJob(3)"></div><div><div class="pj-label">Additional issues noted</div><div class="pj-sub">Any extra problems spotted</div></div></div>
+            <div class="postjob-check"><div class="pj-checkbox" id="pj-1" onclick="togglePostJob(1)"></div><div><div class="pj-label">Work completed as described</div><div class="pj-sub">All services performed</div></div></div>
+            <div class="postjob-check"><div class="pj-checkbox" id="pj-2" onclick="togglePostJob(2)"></div><div><div class="pj-label">Customer informed of all findings</div><div class="pj-sub">Explained what was fixed</div></div></div>
+            <div class="postjob-check"><div class="pj-checkbox" id="pj-3" onclick="togglePostJob(3)"></div><div><div class="pj-label">Additional issues noted</div><div class="pj-sub">Any extra problems communicated</div></div></div>
             <div class="postjob-check"><div class="pj-checkbox" id="pj-4" onclick="togglePostJob(4)"></div><div><div class="pj-label">Customer questions answered</div></div></div>
             <div style="margin-top:14px">
               <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">What was fixed</label>
-              <textarea id="f-work-done" rows="3" placeholder="e.g. Replaced front brake pads..." style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'Mulish',sans-serif;font-size:13px;color:#fff;resize:none"></textarea>
+              <textarea id="f-work-done" rows="3" placeholder="e.g. Replaced front brake pads..." style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:'Mulish',sans-serif;font-size:13px;color:var(--text);resize:vertical;outline:none"></textarea>
             </div>
           </div>
           <div class="step-actions"><button class="btn btn-ghost" onclick="goStep(3)">← Back</button><div class="spacer"></div><button class="btn btn-dark" onclick="goStep(5)">Next →</button></div>
@@ -231,13 +231,32 @@
         <div id="inbox-list"></div>
       </div>
 
+      <!-- ACCOUNTS -->
+      <div class="screen" id="screen-accounts">
+        <div class="section-heading"><h2>Accounts</h2><div class="badge">Admin</div></div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:0;flex:1">🔧 Technicians</div>
+            <button class="btn btn-dark" style="font-size:12px;padding:7px 14px" onclick="openAccountModal('tech')">+ New Tech</button>
+          </div>
+          <div id="tech-accounts-list"></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:0;flex:1">🚗 Customers</div>
+            <button class="btn btn-dark" style="font-size:12px;padding:7px 14px" onclick="openAccountModal('customer')">+ New Customer</button>
+          </div>
+          <div id="customer-accounts-list"></div>
+        </div>
+      </div>
+
       <!-- PRICING -->
       <div class="screen" id="screen-pricing">
         <div class="section-heading"><h2>Service Pricing</h2><div style="flex:1"></div><button class="btn btn-accent" onclick="saveServicePrices()">💾 Save Prices</button></div>
         <div class="card">
           <div class="card-title">Set Your Prices</div>
           <div id="app-price-editor"></div>
-          <div id="price-saved-msg" style="display:none;color:var(--green);font-size:13px;font-weight:700;margin-top:14px;text-align:center;padding:10px;background:rgba(34,214,122,.08);border-radius:8px">✓ Prices updated!</div>
+          <div id="price-saved-msg" style="display:none;color:var(--green);font-size:13px;font-weight:700;margin-top:14px;text-align:center;padding:10px;background:rgba(34,214,122,.08);border-radius:8px">✓ Prices saved!</div>
         </div>
       </div>
 
@@ -248,7 +267,7 @@
 <!-- CUSTOMER PORTAL -->
 <div id="cust-portal">
   <div class="portal-header">
-    <div class="logo" style="font-size:18px"><img src="assets/logo.svg" alt="InspectPro" class="logo-img logo-img--portal"></div>
+    <div class="logo" style="font-size:18px">Inspect<span>Pro</span></div>
     <div id="portal-greeting" style="font-size:13px;color:rgba(255,255,255,.5)"></div>
     <div style="flex:1"></div>
     <button class="logout-btn" onclick="logout()">Exit</button>
@@ -259,14 +278,9 @@
       <div id="portal-vehicle-info" style="font-size:14px;color:#fff;line-height:1.8"></div>
     </div>
     <div class="portal-card" style="border-color:rgba(232,255,71,.15)">
-      <div class="pc-title" style="color:var(--accent)">📍 Find Your Technician</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:14px">Search by name or find nearby mechanics.</div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-        <button onclick="setRadiusSearchRange(25)" class="portal-btn portal-btn-ghost" style="font-size:12px;padding:8px 14px">📍 25 miles</button>
-        <button onclick="setRadiusSearchRange(50)" class="portal-btn portal-btn-ghost" style="font-size:12px;padding:8px 14px">📍 50 miles</button>
-      </div>
-      <div id="nearby-mechanics-container" style="margin-bottom:14px"></div>
-      <div style="display:flex;gap:8px">
+      <div class="pc-title" style="color:var(--accent)">🔍 Find Your Technician</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:14px">Search by name to connect.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
         <input type="text" id="tech-search-input" class="portal-input" placeholder="Search technician name..." style="flex:1;margin-bottom:0" oninput="searchTechnicians(this.value)">
       </div>
       <div id="tech-search-results"></div>
@@ -303,10 +317,10 @@
     <div class="portal-card">
       <div class="pc-title">🛞 Tire Condition Notes</div>
       <div class="portal-tire-grid">
-        <div class="portal-tire-cell"><div class="ptc-label">Front Left</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-fl-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-fl-outer" placeholder="good"></div></div></div>
-        <div class="portal-tire-cell"><div class="ptc-label">Front Right</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-fr-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-fr-outer" placeholder="good"></div></div></div>
-        <div class="portal-tire-cell"><div class="ptc-label">Rear Left</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-rl-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-rl-outer" placeholder="good"></div></div></div>
-        <div class="portal-tire-cell"><div class="ptc-label">Rear Right</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-rr-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-rr-outer" placeholder="good"></div></div></div>
+        <div class="portal-tire-cell"><div class="ptc-label">Front Left</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-fl-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-fl-outer" placeholder="worn"></div></div></div>
+        <div class="portal-tire-cell"><div class="ptc-label">Front Right</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-fr-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-fr-outer" placeholder="worn"></div></div></div>
+        <div class="portal-tire-cell"><div class="ptc-label">Rear Left</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-rl-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-rl-outer" placeholder="worn"></div></div></div>
+        <div class="portal-tire-cell"><div class="ptc-label">Rear Right</div><div class="ptc-inner"><div><label>Inner</label><input class="portal-input" id="pt-rr-inner" placeholder="good"></div><div><label>Outer</label><input class="portal-input" id="pt-rr-outer" placeholder="worn"></div></div></div>
       </div>
     </div>
     <div class="portal-card">
@@ -317,9 +331,9 @@
       <div class="pc-title" style="color:var(--accent)">📨 Send To</div>
       <div id="send-to-selected" style="display:none;background:rgba(232,255,71,.08);border:1.5px solid rgba(232,255,71,.3);border-radius:12px;padding:14px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div id="sts-avatar" style="width:40px;height:40px;border-radius:10px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;color:var(--accent)"></div>
+          <div id="sts-avatar" style="width:40px;height:40px;border-radius:10px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#e8ff47;flex-shrink:0"></div>
           <div style="flex:1"><div id="sts-name" style="font-weight:800;font-size:14px;color:#fff"></div><div id="sts-sub" style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px"></div></div>
-          <button onclick="clearSelectedTech()" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:7px;color:rgba(255,255,255,.4);font-size:12px;padding:5px 10px;cursor:pointer">✕ Change</button>
+          <button onclick="clearSelectedTech()" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:7px;color:rgba(255,255,255,.4);font-size:12px;padding:5px 10px;cursor:pointer">Change</button>
         </div>
       </div>
       <div id="send-to-picker">
@@ -333,16 +347,45 @@
         <div id="send-to-results" style="margin-top:10px"></div>
       </div>
     </div>
-    <div class="portal-card">
-      <div class="pc-title">💳 My Subscriptions</div>
-      <button onclick="renderSubscriptionManagementScreen()" class="portal-btn" style="width:100%;background:var(--accent);color:var(--dark);font-weight:800">Manage Subscriptions</button>
-    </div>
   </div>
   <div class="portal-submit-bar">
     <div id="submit-bar-status" style="font-size:12px;color:rgba(255,59,59,.7);font-weight:600">⚠ Select a technician to submit</div>
     <div style="flex:1"></div>
     <button class="portal-btn portal-btn-ghost" onclick="logout()">Cancel</button>
     <button class="portal-btn" id="portal-submit-btn" onclick="submitPortal()" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.3);cursor:not-allowed" disabled>✓ Submit</button>
+  </div>
+</div>
+
+<!-- ACCOUNT MODAL -->
+<div class="modal-bg" id="account-modal">
+  <div class="modal-box">
+    <h3 id="acct-modal-title">Create Account</h3>
+    <p id="acct-modal-sub">Fill in the details below.</p>
+    <input type="hidden" id="acct-edit-id">
+    <input type="hidden" id="acct-type">
+    <label>Full Name</label><input type="text" id="acct-name" placeholder="Full name">
+    <label>Username</label><input type="text" id="acct-username" placeholder="Username" autocomplete="off">
+    <label>Password</label><input type="password" id="acct-password" placeholder="Password" autocomplete="new-password">
+    <div id="acct-cust-fields" style="display:none">
+      <label>Phone</label><input type="tel" id="acct-phone" placeholder="(555) 000-0000">
+      <label>Vehicle</label><input type="text" id="acct-vehicle" placeholder="2022 Toyota Camry">
+    </div>
+    <div id="acct-tech-fields" style="display:none">
+      <label>Star Rating (1–5)</label>
+      <div style="display:flex;gap:6px;margin-bottom:10px" id="acct-star-picker">
+        <span class="star" onclick="setAcctRating(1)" id="acct-star-1">☆</span>
+        <span class="star" onclick="setAcctRating(2)" id="acct-star-2">☆</span>
+        <span class="star" onclick="setAcctRating(3)" id="acct-star-3">☆</span>
+        <span class="star" onclick="setAcctRating(4)" id="acct-star-4">☆</span>
+        <span class="star" onclick="setAcctRating(5)" id="acct-star-5">☆</span>
+      </div>
+    </div>
+    <div class="login-error" id="acct-error"></div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="closeAccountModal()">Cancel</button>
+      <div class="spacer"></div>
+      <button class="btn btn-accent" onclick="saveAccount()">💾 Save</button>
+    </div>
   </div>
 </div>
 
@@ -379,49 +422,9 @@
   </div>
 </div>
 
-<!-- ACCOUNTS MODAL -->
-<div class="modal-bg" id="account-modal">
-  <div class="modal-box" style="max-height:80vh;overflow-y:auto">
-    <h3 id="acct-modal-title">New Account</h3>
-    <p id="acct-modal-sub">Fill in the details below.</p>
-    <input type="hidden" id="acct-type" value="tech">
-    <input type="hidden" id="acct-edit-id" value="">
-    
-    <label>Full Name</label><input id="acct-name" placeholder="John Doe">
-    <label>Username</label><input id="acct-username" placeholder="johndoe" autocomplete="username">
-    <label>Password</label><input id="acct-password" type="password" placeholder="Password (leave blank to keep)" autocomplete="new-password">
-    
-    <div id="acct-cust-fields" style="display:none">
-      <label>Phone</label><input id="acct-phone" type="tel" placeholder="(555) 000-0000">
-      <label>Vehicle</label><input id="acct-vehicle" placeholder="2022 Toyota Camry">
-    </div>
-    
-    <div id="acct-tech-fields" style="display:none">
-      <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.35);display:block;margin-bottom:6px">Rating</label>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <span class="acct-star" id="acct-star-1" onclick="setAcctRating(1)" style="font-size:24px;cursor:pointer;color:rgba(0,0,0,.25)">☆</span>
-        <span class="acct-star" id="acct-star-2" onclick="setAcctRating(2)" style="font-size:24px;cursor:pointer;color:rgba(0,0,0,.25)">☆</span>
-        <span class="acct-star" id="acct-star-3" onclick="setAcctRating(3)" style="font-size:24px;cursor:pointer;color:rgba(0,0,0,.25)">☆</span>
-        <span class="acct-star" id="acct-star-4" onclick="setAcctRating(4)" style="font-size:24px;cursor:pointer;color:rgba(0,0,0,.25)">☆</span>
-        <span class="acct-star" id="acct-star-5" onclick="setAcctRating(5)" style="font-size:24px;cursor:pointer;color:rgba(0,0,0,.25)">☆</span>
-      </div>
-    </div>
-    
-    <div class="login-error" id="acct-error"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeAccountModal()">Cancel</button>
-      <div class="spacer"></div>
-      <button class="btn btn-accent" onclick="saveAccount()">✓ Save</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 <div id="marker-list" style="display:none"></div>
 
 <script src="app.js"></script>
-<script src="checkout.js"></script>
-<script src="subscriptions.js"></script>
-<script src="mechanic-radius.js"></script>
 </body>
 </html>
