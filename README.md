@@ -1,5 +1,7 @@
 # InspectPro 🔍
 
+<img src="assets/logo.svg" alt="InspectPro Logo" width="240">
+
 Professional vehicle inspection app for technicians and customers.
 
 ---
