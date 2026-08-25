@@ -20,8 +20,7 @@ html{scroll-behavior:smooth;}
 /* LOGIN GATE */
 #login-gate{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
 .login-box{background:rgba(15,52,96,.8);border:1px solid rgba(232,255,71,.2);border-radius:20px;padding:40px;width:100%;max-width:420px;backdrop-filter:blur(10px);}
-.login-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;margin-bottom:6px;letter-spacing:-1px;}
-.login-logo span{color:var(--accent);}
+.login-logo{margin-bottom:6px;}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
 .login-mode-btns{display:flex;gap:6px;margin-bottom:18px;}
 .lmode-btn{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:rgba(255,255,255,.6);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
@@ -37,8 +36,7 @@ html{scroll-behavior:smooth;}
 
 /* TOP BAR */
 #topbar{background:linear-gradient(90deg,rgba(26,26,46,.95) 0%,rgba(26,26,46,.85) 100%);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:12px 20px;flex-wrap:wrap;backdrop-filter:blur(10px);}
-.logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:900;letter-spacing:-.5px;white-space:nowrap;}
-.logo span{color:var(--accent);}
+.logo{white-space:nowrap;}
 .top-tab{background:none;border:none;color:rgba(255,255,255,.5);padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border-radius:8px;}
 .top-tab:hover{color:#fff;background:rgba(255,255,255,.08);}
 .top-tab.active{color:var(--accent);background:rgba(232,255,71,.1);}
@@ -106,8 +104,15 @@ html{scroll-behavior:smooth;}
 
 /* RECEIPT */
 .receipt{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;font-size:13px;line-height:1.6;}
-.receipt-logo{font-family:'Syne',sans-serif;font-weight:900;font-size:22px;margin-bottom:4px;letter-spacing:-.5px;}
-.receipt-logo span{color:var(--accent);}
+.receipt-logo{margin-bottom:4px;}
+.brand-logo{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;}
+.logo-img{height:32px;width:auto;display:block;flex-shrink:0;}
+.logo-img-lg{height:44px;}
+.logo-img-sm{height:28px;}
+.logo-wordmark{font-family:'Syne',sans-serif;font-weight:900;font-size:18px;letter-spacing:-.5px;line-height:1;white-space:nowrap;}
+.logo-wordmark span{color:var(--accent);}
+.login-logo .logo-wordmark{font-size:28px;letter-spacing:-1px;}
+.receipt-logo .logo-wordmark{font-size:22px;}
 .receipt-divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
 .receipt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
 .rlabel{color:var(--muted);font-weight:600;}
