@@ -72,7 +72,7 @@ function renderSlot(slot, stream, originalValue = '') {
 function loadStream(slot, value, persist = true) {
   const message = document.getElementById(`message-${slot}`);
   try {
-    const stream = parseStream(value);
+    const stream = { ...parseStream(value), source: value };
     renderSlot(slot, stream, value);
     message.classList.remove('error');
     message.textContent = `Loaded ${stream.label}.`;
@@ -103,7 +103,7 @@ function renderSaved() {
     load.type = 'button';
     load.textContent = stream.label;
     load.title = `Load ${stream.label}`;
-    load.addEventListener('click', () => loadStream(0, stream.url));
+    load.addEventListener('click', () => loadStream(0, stream.source || stream.url));
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'remove-saved';
