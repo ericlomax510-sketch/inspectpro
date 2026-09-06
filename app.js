@@ -29,7 +29,7 @@ function parseStream(value) {
     if (!name && !video) throw new Error('Paste a Twitch channel or video URL.');
     const parent = window.location.hostname || 'localhost';
     const query = video ? `video=${encodeURIComponent(video)}` : `channel=${encodeURIComponent(name)}`;
-    return { platform: 'Twitch', url: `https://player.twitch.tv/?${query}&parent=${encodeURIComponent(parent)}&autoplay=false`, label: `Twitch · ${video || name}` };
+    return { platform: 'Twitch', url: `https://player.twitch.tv/?${query}&parent=${encodeURIComponent(parent)}&autoplay=true&muted=true`, label: `Twitch · ${video || name}` };
   }
   if (host === 'kick.com' || host.endsWith('.kick.com')) {
     const channel = parts[0];
@@ -75,7 +75,9 @@ function loadStream(slot, value, persist = true) {
     const stream = { ...parseStream(value), source: value };
     renderSlot(slot, stream, value);
     message.classList.remove('error');
-    message.textContent = `Loaded ${stream.label}.`;
+    message.textContent = stream.platform === 'Twitch'
+      ? `Loaded ${stream.label}. It is playing muted; use the Twitch player controls to unmute it.`
+      : `Loaded ${stream.label}.`;
     if (persist) {
       saveStream(stream);
       const active = JSON.parse(localStorage.getItem(slotKey) || '[]');

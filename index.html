@@ -14,7 +14,7 @@
         <p class="eyebrow">MULTI-STREAM VIEWER</p>
         <h1>Stream<span>Pair</span></h1>
       </div>
-      <p class="header-copy">Watch two live streams side by side.</p>
+      <p class="header-copy">Watch two streams at once. They begin muted, so you choose which one to hear.</p>
     </header>
 
     <section class="stream-grid" aria-label="Stream players">
@@ -32,22 +32,31 @@
       </article>
     </section>
 
+    <section class="twitch-guide" aria-labelledby="twitch-title">
+      <div>
+        <p class="eyebrow">TWITCH VIEWING</p>
+        <h2 id="twitch-title">Sign in, then pick two channels.</h2>
+        <p>Sign in to Twitch to use your account in Twitch players. Paste a different channel URL into each stream field; both begin playing muted.</p>
+      </div>
+      <a class="twitch-login" href="https://www.twitch.tv/login" target="_blank" rel="noopener noreferrer">Sign in to Twitch ↗</a>
+    </section>
+
     <section class="controls" aria-label="Stream controls">
       <form class="stream-form" data-slot="0">
-        <label for="stream-input-0">Stream 1 URL or channel</label>
+        <label for="stream-input-0">Stream 1 channel or URL</label>
         <div class="input-row">
           <input id="stream-input-0" name="stream-0" autocomplete="url" placeholder="youtube.com/watch?v=… or twitch.tv/channel">
           <button type="submit">Load stream</button>
         </div>
-        <p class="hint" id="message-0">YouTube videos, Twitch channels/videos, and Kick channels are supported.</p>
+        <p class="hint" id="message-0">For Twitch, paste a channel such as twitch.tv/twitch.</p>
       </form>
       <form class="stream-form" data-slot="1">
-        <label for="stream-input-1">Stream 2 URL or channel</label>
+        <label for="stream-input-1">Stream 2 channel or URL</label>
         <div class="input-row">
           <input id="stream-input-1" name="stream-1" autocomplete="url" placeholder="kick.com/channel or youtube.com/watch?v=…">
           <button type="submit">Load stream</button>
         </div>
-        <p class="hint" id="message-1">Paste a public stream URL, then use its player controls normally.</p>
+        <p class="hint" id="message-1">Use a different Twitch channel, then unmute either player when you want audio.</p>
       </form>
     </section>
 
